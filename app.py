@@ -104,7 +104,8 @@ elif st.session_state.page_selection == "eda":
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
     
-    if uploaded_file is not None:
+    if 'uploaded_file' in st.session_state:
+        uploaded_file = st.session_state.uploaded_file
         st.write("Dataset Preview:")
         data = pd.read_csv(uploaded_file)
         st.write(data)
@@ -129,7 +130,8 @@ elif st.session_state.page_selection == "data_cleaning":
 elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
-    if uploaded_file is not None:
+    if 'uploaded_file' in st.session_state:  # Check if the uploaded file exists in session state
+        uploaded_file = st.session_state.uploaded_file
         data = pd.read_csv(uploaded_file)
         target = st.selectbox("Select Target Variable", options=data.columns)
         model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering"])
