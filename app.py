@@ -82,7 +82,10 @@ elif st.session_state.page_selection == "dataset":
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
 
-    if uploaded_file is not None:
+    if 'uploaded_file' in st.session_state:
+        uploaded_file = st.session_state.uploaded_file
+        data = pd.read_csv(uploaded_file)
+        
         col = st.columns((1.5, 4.5, 2), gap='medium')
         
         with col[0]:
