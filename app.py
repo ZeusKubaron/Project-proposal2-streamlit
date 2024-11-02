@@ -56,7 +56,7 @@ with st.sidebar:
 
     # Project Members
     st.subheader("Members")
-    st.markdown("1. Julianna Chanel Boado\n2. 2. Kobe Lituañas\n2. 3. Zeus Jebril A. Kubaron\n2. 4. John Augustine Caluag\n2. 5. Joaquin Xavier Lajom\n2.  ")
+    st.markdown("1. Julianna Chanel Boado\n2. Kobe Lituañas\n3. Zeus Jebril A. Kubaron\n4. John Augustine Caluag\n5. Joaquin Xavier Lajom")
 
 #######################
 # Pages
