@@ -73,6 +73,7 @@ elif st.session_state.page_selection == "dataset":
     uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
     
     if uploaded_file is not None:
+        st.session_state.uploaded_file = uploaded_file
         data = pd.read_csv(uploaded_file)
         st.write("Dataset Preview:")
         st.write(data)
