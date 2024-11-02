@@ -33,26 +33,13 @@ with st.sidebar:
     st.subheader("Pages")
 
     # Page Button Navigation
-    if st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',)):
-        st.session_state.page_selection = 'about'
-    
-    if st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',)):
-        st.session_state.page_selection = 'dataset'
-
-    if st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',)):
-        st.session_state.page_selection = "eda"
-
-    if st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',)):
-        st.session_state.page_selection = "data_cleaning"
-
-    if st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',)): 
-        st.session_state.page_selection = "machine_learning"
-
-    if st.button("Prediction", use_container_width=True, on_click=set_page_selection, args=('prediction',)): 
-        st.session_state.page_selection = "prediction"
-
-    if st.button("Conclusion", use_container_width=True, on_click=set_page_selection, args=('conclusion',)):
-        st.session_state.page_selection = "conclusion"
+    st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',))
+    st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',))
+    st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',))
+    st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',))
+    st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',))
+    st.button("Prediction", use_container_width=True, on_click=set_page_selection, args=('prediction',))
+    st.button("Conclusion", use_container_width=True, on_click=set_page_selection, args=('conclusion',))
 
     # Project Members
     st.subheader("Members")
@@ -70,21 +57,24 @@ if st.session_state.page_selection == "about":
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
     st.write("Upload and explore your dataset here.")
-    uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
     
-    if uploaded_file is not None:
-        st.session_state.uploaded_file = uploaded_file
-        data = pd.read_csv(uploaded_file)
+    # Only upload if it's not already in session state
+    if 'data' not in st.session_state:
+        uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+        if uploaded_file is not None:
+            st.session_state.data = pd.read_csv(uploaded_file)
+            st.write("Dataset Preview:")
+            st.write(st.session_state.data)
+    else:
         st.write("Dataset Preview:")
-        st.write(data)
+        st.write(st.session_state.data)
 
 # EDA Page
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
-
-    if 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state.uploaded_file
-        data = pd.read_csv(uploaded_file)
+    
+    if 'data' in st.session_state:
+        data = st.session_state.data
         
         col = st.columns((1.5, 4.5, 2), gap='medium')
         
@@ -104,22 +94,19 @@ elif st.session_state.page_selection == "eda":
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
     
-    if 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state.uploaded_file
-        st.write("Dataset Preview:")
-        data = pd.read_csv(uploaded_file)
-        st.write(data)
+    if 'data' in st.session_state:
+        data = st.session_state.data
 
         # Cleaning Options
         if st.button("Remove Null Values"):
-            data = data.dropna()
+            st.session_state.data = data.dropna()
             st.write("Data after removing null values:")
-            st.write(data)
+            st.write(st.session_state.data)
 
         if st.button("Remove Duplicates"):
-            data = data.drop_duplicates()
+            st.session_state.data = data.drop_duplicates()
             st.write("Data after removing duplicates:")
-            st.write(data)
+            st.write(st.session_state.data)
 
         # Summary Statistics
         if st.button("Show Summary Statistics"):
@@ -130,9 +117,8 @@ elif st.session_state.page_selection == "data_cleaning":
 elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
-    if 'uploaded_file' in st.session_state:  # Check if the uploaded file exists in session state
-        uploaded_file = st.session_state.uploaded_file
-        data = pd.read_csv(uploaded_file)
+    if 'data' in st.session_state:  # Check if data exists in session state
+        data = st.session_state.data
         target = st.selectbox("Select Target Variable", options=data.columns)
         model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering"])
 
