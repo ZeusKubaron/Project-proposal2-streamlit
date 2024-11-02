@@ -10,7 +10,7 @@ from sklearn.cluster import KMeans
 # Page configuration
 st.set_page_config(
     page_title="Project Proposal Dashboard",
-    page_icon="📊", # Customize with a suitable icon or emoji
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
