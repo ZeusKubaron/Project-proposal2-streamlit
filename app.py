@@ -97,6 +97,10 @@ elif st.session_state.page_selection == "data_cleaning":
     if 'data' in st.session_state:
         data = st.session_state.data
 
+        # Display the original dataset for reference
+        st.write("Original Dataset:")
+        st.write(data)
+
         # Cleaning Options
         if st.button("Remove Null Values"):
             st.session_state.data = data.dropna()
@@ -108,10 +112,23 @@ elif st.session_state.page_selection == "data_cleaning":
             st.write("Data after removing duplicates:")
             st.write(st.session_state.data)
 
+        # Dropping unused column 'Person ID'
+        if st.button("Drop 'Person ID' Column"):
+            if 'Person ID' in st.session_state.data.columns:
+                st.session_state.data.drop('Person ID', axis=1, inplace=True)
+                st.write("Dropped 'Person ID' column as it does not contribute to predicting sleep disorders.")
+            else:
+                st.write("The 'Person ID' column does not exist in the dataset.")
+
         # Summary Statistics
         if st.button("Show Summary Statistics"):
             st.write("Summary Statistics:")
             st.write(data.describe())
+
+        # Display cleaned data
+        if st.button("Show Cleaned Data"):
+            st.write("Cleaned Data:")
+            st.write(st.session_state.data)
 
 # Machine Learning Page
 elif st.session_state.page_selection == "machine_learning":
