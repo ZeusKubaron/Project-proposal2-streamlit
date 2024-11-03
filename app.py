@@ -5,12 +5,15 @@ import altair as alt
 import plotly.express as px
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 #######################
 # Page configuration
 st.set_page_config(
     page_title="Project Proposal Dashboard",
-    page_icon="📊", # Customize with a suitable icon or emoji
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -33,26 +36,13 @@ with st.sidebar:
     st.subheader("Pages")
 
     # Page Button Navigation
-    if st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',)):
-        st.session_state.page_selection = 'about'
-    
-    if st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',)):
-        st.session_state.page_selection = 'dataset'
-
-    if st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',)):
-        st.session_state.page_selection = "eda"
-
-    if st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',)):
-        st.session_state.page_selection = "data_cleaning"
-
-    if st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',)): 
-        st.session_state.page_selection = "machine_learning"
-
-    if st.button("Prediction", use_container_width=True, on_click=set_page_selection, args=('prediction',)): 
-        st.session_state.page_selection = "prediction"
-
-    if st.button("Conclusion", use_container_width=True, on_click=set_page_selection, args=('conclusion',)):
-        st.session_state.page_selection = "conclusion"
+    st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',))
+    st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',))
+    st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',))
+    st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',))
+    st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',))
+    st.button("Prediction", use_container_width=True, on_click=set_page_selection, args=('prediction',))
+    st.button("Conclusion", use_container_width=True, on_click=set_page_selection, args=('conclusion',))
 
     # Project Members
     st.subheader("Members")
@@ -70,21 +60,24 @@ if st.session_state.page_selection == "about":
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
     st.write("Upload and explore your dataset here.")
-    uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
     
-    if uploaded_file is not None:
-        st.session_state.uploaded_file = uploaded_file
-        data = pd.read_csv(uploaded_file)
+    # Only upload if it's not already in session state
+    if 'data' not in st.session_state:
+        uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
+        if uploaded_file is not None:
+            st.session_state.data = pd.read_csv(uploaded_file)
+            st.write("Dataset Preview:")
+            st.write(st.session_state.data)
+    else:
         st.write("Dataset Preview:")
-        st.write(data)
+        st.write(st.session_state.data)
 
 # EDA Page
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
-
-    if 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state.uploaded_file
-        data = pd.read_csv(uploaded_file)
+    
+    if 'data' in st.session_state:
+        data = st.session_state.data
         
         col = st.columns((1.5, 4.5, 2), gap='medium')
         
@@ -104,37 +97,51 @@ elif st.session_state.page_selection == "eda":
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
     
-    if 'uploaded_file' in st.session_state:
-        uploaded_file = st.session_state.uploaded_file
-        st.write("Dataset Preview:")
-        data = pd.read_csv(uploaded_file)
+    if 'data' in st.session_state:
+        data = st.session_state.data
+
+        # Display the original dataset for reference
+        st.write("Original Dataset:")
         st.write(data)
 
         # Cleaning Options
         if st.button("Remove Null Values"):
-            data = data.dropna()
+            st.session_state.data = data.dropna()
             st.write("Data after removing null values:")
-            st.write(data)
+            st.write(st.session_state.data)
 
         if st.button("Remove Duplicates"):
-            data = data.drop_duplicates()
+            st.session_state.data = data.drop_duplicates()
             st.write("Data after removing duplicates:")
-            st.write(data)
+            st.write(st.session_state.data)
+
+        # Dropping unused column 'Person ID'
+        if st.button("Drop 'Person ID' Column"):
+            if 'Person ID' in st.session_state.data.columns:
+                st.session_state.data.drop('Person ID', axis=1, inplace=True)
+                st.write("Dropped 'Person ID' column as it does not contribute to predicting sleep disorders.")
+            else:
+                st.write("The 'Person ID' column does not exist in the dataset.")
 
         # Summary Statistics
         if st.button("Show Summary Statistics"):
             st.write("Summary Statistics:")
             st.write(data.describe())
 
+        # Display cleaned data
+        if st.button("Show Cleaned Data"):
+            st.write("Cleaned Data:")
+            st.write(st.session_state.data)
+
 # Machine Learning Page
 elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
-    if 'uploaded_file' in st.session_state:  # Check if the uploaded file exists in session state
-        uploaded_file = st.session_state.uploaded_file
-        data = pd.read_csv(uploaded_file)
+    if 'data' in st.session_state:  # Check if data exists in session state
+        data = st.session_state.data
         target = st.selectbox("Select Target Variable", options=data.columns)
-        model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering"])
+        
+        model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering", "Decision Tree"])
 
         if model_type == "Random Forest":
             n_estimators = st.slider("Number of Trees", 10, 100, 50)
@@ -157,6 +164,25 @@ elif st.session_state.page_selection == "machine_learning":
                 model.fit(X)
                 st.write("Model trained successfully!")
                 st.write("Cluster Centers:", model.cluster_centers_)
+
+        elif model_type == "Decision Tree":
+            # Enhanced Supervised Model
+            new_features = ['BMICategory_Num', 'BloodPressure_Num']
+            new_X = data[new_features]
+            new_Y = data['SleepDisorder_Num']
+
+            # Split the dataset into training and testing sets
+            new_X_train, new_X_test, new_Y_train, new_Y_test = train_test_split(new_X, new_Y, test_size=0.3, random_state=42)
+
+            # Train the Decision Tree Classifier
+            new_dt_classifier = DecisionTreeClassifier(random_state=42)
+            new_dt_classifier.fit(new_X_train, new_Y_train)
+
+            # Model Evaluation
+            if st.button("Evaluate Model"):
+                y_pred = new_dt_classifier.predict(new_X_test)
+                accuracy = accuracy_score(new_Y_test, y_pred)
+                st.write(f'Accuracy: {accuracy * 100:.2f}%')
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
