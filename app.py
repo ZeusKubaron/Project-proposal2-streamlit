@@ -5,6 +5,9 @@ import altair as alt
 import plotly.express as px
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
 
 #######################
 # Page configuration
@@ -137,7 +140,8 @@ elif st.session_state.page_selection == "machine_learning":
     if 'data' in st.session_state:  # Check if data exists in session state
         data = st.session_state.data
         target = st.selectbox("Select Target Variable", options=data.columns)
-        model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering"])
+        
+        model_type = st.selectbox("Select Model", ["Random Forest", "K-Means Clustering", "Decision Tree"])
 
         if model_type == "Random Forest":
             n_estimators = st.slider("Number of Trees", 10, 100, 50)
@@ -160,6 +164,25 @@ elif st.session_state.page_selection == "machine_learning":
                 model.fit(X)
                 st.write("Model trained successfully!")
                 st.write("Cluster Centers:", model.cluster_centers_)
+
+        elif model_type == "Decision Tree":
+            # Enhanced Supervised Model
+            new_features = ['BMICategory_Num', 'BloodPressure_Num']
+            new_X = data[new_features]
+            new_Y = data['SleepDisorder_Num']
+
+            # Split the dataset into training and testing sets
+            new_X_train, new_X_test, new_Y_train, new_Y_test = train_test_split(new_X, new_Y, test_size=0.3, random_state=42)
+
+            # Train the Decision Tree Classifier
+            new_dt_classifier = DecisionTreeClassifier(random_state=42)
+            new_dt_classifier.fit(new_X_train, new_Y_train)
+
+            # Model Evaluation
+            if st.button("Evaluate Model"):
+                y_pred = new_dt_classifier.predict(new_X_test)
+                accuracy = accuracy_score(new_Y_test, y_pred)
+                st.write(f'Accuracy: {accuracy * 100:.2f}%')
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
