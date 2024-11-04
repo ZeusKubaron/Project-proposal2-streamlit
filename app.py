@@ -104,7 +104,7 @@ elif st.session_state.page_selection == "data_cleaning":
         st.write("Original Dataset:")
         st.write(data)
 
-        # Cleaning Options
+        # Data Cleaning Options
         if st.button("Remove Null Values"):
             st.session_state.data = data.dropna()
             st.write("Data after removing null values:")
@@ -128,10 +128,36 @@ elif st.session_state.page_selection == "data_cleaning":
             st.write("Summary Statistics:")
             st.write(data.describe())
 
-        # Display cleaned data
-        if st.button("Show Cleaned Data"):
-            st.write("Cleaned Data:")
-            st.write(st.session_state.data)
+        # Train-Test Split Section
+        st.subheader("Train-Test Split")
+        
+        # Select features and target column for splitting
+        target = st.selectbox("Select Target Variable for Split", options=data.columns)
+        
+        # Splitting the dataset into training and testing sets
+        if st.button("Perform Train-Test Split"):
+            features = [col for col in data.columns if col != target]
+            X = data[features]
+            y = data[target]
+
+            # Execute train-test split
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+            # Display train-test split
+            st.write("### Train-Test Split Overview")
+            st.write("Dataset has been split into training and testing sets with a 70-30 ratio.")
+
+            st.write("#### X_train (Training Features)")
+            st.dataframe(X_train.head())
+
+            st.write("#### X_test (Testing Features)")
+            st.dataframe(X_test.head())
+
+            st.write("#### y_train (Training Labels)")
+            st.dataframe(y_train.head())
+
+            st.write("#### y_test (Testing Labels)")
+            st.dataframe(y_test.head())
 
 # Machine Learning Page
 elif st.session_state.page_selection == "machine_learning":
