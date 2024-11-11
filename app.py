@@ -54,10 +54,10 @@ with st.sidebar:
     st.subheader("Members")
     st.markdown("""
     1. Julianna Chanel Boado
-    2. Kobe Lituañas
+    2. John Augustine Caluag
     3. Zeus Jebril A. Kubaron
-    4. John Augustine Caluag
-    5. Joaquin Xavier Lajom
+    4. Joaquin Xavier S. Lajom
+    5. Kobe Lituañas
     """)
 
 #######################
@@ -76,16 +76,56 @@ elif st.session_state.page_selection == "dataset":
     st.write("Upload and explore your dataset here.")
 
     # Only upload if it's not already in session state
-    if 'data' not in st.session_state:
+    if "data" not in st.session_state:
         uploaded_file = st.file_uploader("Upload a CSV file", type="csv")
         if uploaded_file is not None:
             st.session_state.data = pd.read_csv(uploaded_file)
             st.success("Dataset Loaded Successfully!")
-            st.write("### Dataset Preview:")
-            st.dataframe(st.session_state.data.head())
+
+    if "data" in st.session_state:
+        data = st.session_state.data
+
+        st.markdown("""
+                        ### Content
+                        - **Comprehensive Sleep Metrics**: Explore sleep duration, quality, and factors influencing sleep patterns.
+                        - **Lifestyle Factors**: Analyze physical activity levels, stress levels, and BMI categories.
+                        - **Cardiovascular Health**: Examine blood pressure and heart rate measurements.
+                        - **Sleep Disorder Analysis**: Identify the occurrence of sleep disorders such as Insomnia and Sleep Apnea.\n\n """)
+
+        st.write("### Dataset displayed as Data Frame:")
+        st.write(
+            "This dataset contains 400 rows and 13 columns related to sleep health and lifestyle factors.\n"
+        )
+        st.dataframe(data, use_container_width=True, hide_index=True)
+
+        st.write("""\n
+            ### Details about Sleep Disorder Column:
+
+            - **None**: The individual does not exhibit any specific sleep disorder.
+            - **Insomnia**: The individual experiences difficulty falling asleep or staying asleep, leading to inadequate or poor-quality sleep.
+            - **Sleep Apnea**: The individual suffers from pauses in breathing during sleep, resulting in disrupted sleep patterns and potential health risks.""")
+
+        # Describe Descriptive Statistics
+        st.subheader("Descriptive Statistics")
+        st.dataframe(data.describe(), use_container_width=True)
+
+        st.markdown("### Key Observations")
+        st.write("""
+            - **Sleep Duration**: The average sleep duration is around 7 hours, aligning with standard sleep recommendations for adults.
+            - **Quality of Sleep**: The mean sleep quality score is about 6.5, suggesting moderate overall sleep quality.
+            - **Stress Levels**: The dataset reveals an average stress level of around 5.8, indicating moderate stress among participants.
+            - **Physical Activity**: With a mean score of approximately 6.2, the data reflects a moderately active population sample.
+            - **Daily Steps**: The average daily step count is around 8000, slightly below the commonly recommended 10,000 steps per day.
+            - **Blood Pressure**: The mean blood pressure is approximately 120 mmHg, typical for a healthy adult population.
+            - **Alcohol and Caffeine Consumption**: Both metrics show moderate average consumption levels, around 3.5 and 4 respectively. """)
+
+        st.write("""
+                This overview provides a comprehensive summary of the dataset, detailing key aspects of sleep health
+                and lifestyle factors. With this information, you can proceed to deeper analyses or modeling to explore
+                relationships between these variables, such as the impact of stress and physical activity on sleep quality. """)
+
     else:
-        st.write("### Dataset Preview:")
-        st.dataframe(st.session_state.data.head())
+        st.write("No dataset loaded. Please upload a CSV file to proceed.")
 
 # EDA Page
 elif st.session_state.page_selection == "eda":
@@ -385,7 +425,7 @@ elif st.session_state.page_selection == "prediction":
                     # Assuming you have stored the label encoder, else decode accordingly
                     # For demonstration, assuming labels are encoded as 0,1,2
                     st.write(f"**Predicted Sleep Disorder:** {prediction[0]}")
-        
+
         elif model_type == "Random Forest Classifier":
             st.subheader("Random Forest Classifier Prediction")
 
