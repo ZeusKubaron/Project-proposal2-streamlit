@@ -597,39 +597,8 @@ new_dt_classifier.fit(NewX_train, NewY_train)
 y_pred = new_dt_classifier.predict(NewX_test)
 accuracy = accuracy_score(NewY_test, y_pred)
 print(f'Accuracy: {accuracy * 100:.2f}%')
-                # Predictions
-                y_pred_rf = rf_classifier.predict(X_test)
 
-                # Evaluation
-                accuracy_rf = accuracy_score(y_test, y_pred_rf)
-                report_rf = classification_report(y_test, y_pred_rf, output_dict=True)
-                report_rf_df = pd.DataFrame(report_rf).transpose()
 
-                st.write(f"**Accuracy:** {accuracy_rf * 100:.2f}%")
-                st.write("**Classification Report:**")
-                st.dataframe(report_rf_df)
-
-                # Confusion Matrix
-                cm_rf = confusion_matrix(y_test, y_pred_rf)
-                fig_rf, ax_rf = plt.subplots()
-                sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Greens', ax=ax_rf)
-                ax_rf.set_xlabel('Predicted')
-                ax_rf.set_ylabel('Actual')
-                ax_rf.set_title('Confusion Matrix')
-                st.pyplot(fig_rf)
-
-                # Feature Importance
-                st.write("**Feature Importance:**")
-                feature_importances_rf = pd.Series(rf_classifier.feature_importances_, index=X_train.columns)
-                st.dataframe(feature_importances_rf.sort_values(ascending=False))
-
-                # Feature Importance Plot
-                fig2_rf, ax2_rf = plt.subplots()
-                sns.barplot(x=feature_importances_rf.sort_values(ascending=False), y=feature_importances_rf.sort_values(ascending=False).index, ax=ax2_rf)
-                ax2_rf.set_title('Feature Importances')
-                st.pyplot(fig2_rf)
-    else:
-        st.warning("Please complete the Data Cleaning and Pre-processing steps first.")
 
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
