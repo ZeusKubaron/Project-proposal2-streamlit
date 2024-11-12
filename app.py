@@ -8,6 +8,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 from sklearn.preprocessing import LabelEncoder
+from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
 
@@ -69,7 +70,7 @@ with st.sidebar:
 
     # Project Members
     st.subheader("Members")
-    st.markdown("1. Elon Musk\n2. Jeff Bezos\n3. Sam Altman\n4. Mark Zuckerberg")
+    st.markdown("1. Zeus Jebril Kubaron\n2. Kobe Aniban Lituañas\n3. Juliana Chanel Boado\n4. Joaquin Xavier Lajom\n5. John Augustine Caluag")
 
 #######################
 # Data
@@ -93,7 +94,56 @@ disorder_list = ['Insomnia', 'None', 'Sleep-Apnea	']
 if st.session_state.page_selection == "about":
     st.header("ℹ️ About")
 
-    # Your content for the ABOUT page goes here
+    st.write("""
+    # About this Dashboard
+
+    Welcome to the Sleep Health and Lifestyle Dashboard. This dashboard provides insights into how lifestyle factors affect sleep quality, along with predictive modeling based on machine learning algorithms. Below is a brief overview of each component:
+
+    ---
+
+    ### Dataset
+    The **Sleep Health and Lifestyle Dataset** serves as the foundation of this analysis. This dataset captures various health and lifestyle indicators, helping us explore their impact on **Sleep Quality**.
+
+    ---
+
+    ### Exploratory Data Analysis (EDA)
+    **EDA (Exploratory Data Analysis)** offers a comprehensive look into sleep quality and its relationship with lifestyle factors. Key visualizations include:
+    - **Pie Charts** representing distribution of sleep health categories
+    - **Scatter Plots** depicting relationships between lifestyle variables and sleep quality
+
+    These visualizations help us understand patterns and trends in the data.
+
+    ---
+
+    ### Data Cleaning and Pre-processing
+    Our data cleaning and pre-processing steps include essential tasks such as:
+    - Encoding categorical variables (e.g., sleep quality categories)
+    - Splitting the dataset into **training and testing sets**
+
+    These steps ensure that our data is ready for effective model training and evaluation.
+
+    ---
+
+    ### Machine Learning Models
+    We employed a mix of **unsupervised and supervised models** to analyze and predict sleep quality:
+    - **3 Unsupervised Models** for clustering individuals based on lifestyle and health factors
+    - **2 Supervised Models** to classify sleep quality based on health and lifestyle inputs
+
+    ---
+
+    ### Prediction
+    On the **Prediction Page**, users can input their own values for lifestyle and health indicators. Based on these inputs, our trained models will provide predictions for sleep health. This feature allows users to explore personalized insights.
+
+    ---
+
+    ### Conclusion
+    This section summarizes key insights and observations from the **EDA** and **model training** phases. We also highlight findings and patterns discovered throughout the analysis process, offering a well-rounded perspective on how lifestyle impacts sleep quality.
+
+    ---
+
+    Thank you for using the Sleep Health and Lifestyle Dashboard. We hope this tool provides valuable insights and encourages positive lifestyle changes for better sleep quality.
+    """)
+
 
 # Dataset Page
 elif st.session_state.page_selection == "dataset":
@@ -130,8 +180,6 @@ elif st.session_state.page_selection == "data_cleaning":
 
     st.markdown("""
 
-    Since the distribution of Iris species in our dataset is **balanced** and there are **0 null values** as well in our dataset. We will be proceeding already with creating the **Embeddings** for the *species* column and **Train-Test split** for training our machine learning model.
-         
     """)
 
     # Replace NaN values with "None" in the 'Sleep Disorder' column
@@ -250,6 +298,12 @@ elif st.session_state.page_selection == "data_cleaning":
     # Split the dataset into training and testing sets
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
 
+    # Store the data in session state
+    st.session_state.X_train = X_train
+    st.session_state.X_test = X_test
+    st.session_state.y_train = y_train
+    st.session_state.y_test = y_test
+
     st.code("""
 
     # Split the dataset into training and testing sets
@@ -267,3 +321,310 @@ elif st.session_state.page_selection == "data_cleaning":
 
     st.subheader("y_test")
     st.dataframe(y_test, use_container_width=True, hide_index=True)
+
+    st.session_state.sleep_df3 = sleep_df3
+
+    
+
+
+# Machine Learning Page
+elif st.session_state.page_selection == "machine_learning":
+    if 'sleep_df3' in st.session_state:
+        sleep_df3 = st.session_state['sleep_df3']
+
+        st.header("🤖 Machine Learning")
+
+        st.title('Unsupervised')
+
+        st.markdown("""
+        ### Demographic factors:
+        - Age
+        - Gender
+        - Occupation
+
+        ### Lifestyle factors:
+        - Sleep Duration
+        - Physical Activity Level
+        - Stress Level
+        - Daily Steps
+
+        ### Cardiovascular health factors:
+        - Heart Rate
+        - Blood Pressure
+        - BMI Category
+        - Sleep Disorder
+        """)
+        st.title("Demographic Factors")
+
+        sleep_df3 = st.session_state.get('sleep_df3')
+
+        kmeans = KMeans(n_clusters=3, random_state=0)
+        sleep_df3['Cluster_demographic'] = kmeans.fit_predict(sleep_df3[['Quality of Sleep','Age', 'Gender_Num', 'Occupation_Num']])
+
+        centroids = pd.DataFrame(kmeans.cluster_centers_, columns=['Quality of Sleep', 'Age', 'Gender_Num', 'Occupation_Num'])
+        
+        # Display centroids in the Streamlit app
+        st.write("Cluster Centroids:")
+        st.write(centroids)
+
+
+
+        st.write("Based on the calculated center value of each clusters, cluster 1 has the highest quality of sleep, followed by cluster 0, while cluster 2 has the lowest.")
+
+        #Create a mapping of cluster labels based on your new assignment
+        Cluster_demographic_labels = {
+            0: "Moderate Sleep",  # Label for Cluster 0
+            1: "Good Sleep",    # Label for Cluster 1
+                2: "Bad Sleep"      # Label for Cluster 2
+            }
+        
+        sleep_df3['Cluster_demographic_labels'] = sleep_df3['Cluster_demographic'].map(Cluster_demographic_labels)
+
+        sleep_df3[['Quality of Sleep', 'Age', 'Gender_Num', 'Occupation_Num', 'Cluster_demographic', 'Cluster_demographic_labels']]
+
+        sns.pairplot(sleep_df3[['Quality of Sleep', 'Age', 'Gender_Num', 'Occupation_Num', 'Cluster_demographic_labels']], 
+                hue='Cluster_demographic_labels',palette='viridis')
+        st.pyplot(plt)
+
+        st.write("Cluster 1 represents good quality sleep, with the highest average score of 7.7.  The people are aged about 53.5 years, mostly women (Gender_Num 0.05), and are probably teachers or similar (Occupation_Num 4.05). Cluster 0 has moderate sleep quality, averaging a score of 6.8. Its people are younger, around 33.9 years old, with a slight male majority (Gender_Num 0.76), and and most probably engineers (Occupation_Num 2.82). Cluster 2 has the lowest average score of 6.7 of quality of sleep, with an average age of 43.7 years, a balanced gender distribution (Gender_Num 0.59), and an Occupation_Num of 7.25 suggests many are software engineers.")
+
+
+
+
+
+
+        st.title("Lifestyle Factors")
+
+        kmeans = KMeans(n_clusters=3, random_state=0)
+        sleep_df3['Cluster_lifestyle'] = kmeans.fit_predict(sleep_df3[['Quality of Sleep','Sleep Duration', 'Physical Activity Level', 'Stress Level']])
+
+        # Display centroids for lifestyle clustering
+        centroids = pd.DataFrame(kmeans.cluster_centers_, columns=['Quality of Sleep','Sleep Duration', 'Physical Activity Level', 'Stress Level'])
+        st.write("Lifestyle Cluster Centroids:")
+        st.write(centroids)
+
+        # Create a mapping for the lifestyle cluster labels (same as original)
+        Cluster_lifestyle_labels = {
+                0: "Good Sleep",      # Label for Cluster 0
+                1: "Bad Sleep",       # Label for Cluster 1
+                2: "Moderate Sleep"   # Label for Cluster 2
+            }
+
+        sleep_df3['Cluster_lifestyle_labels'] = sleep_df3['Cluster_lifestyle'].map(Cluster_lifestyle_labels)
+
+        # Displaying the cluster with labels
+        st.write(sleep_df3[['Quality of Sleep','Sleep Duration', 'Physical Activity Level', 'Stress Level', 'Cluster_lifestyle', 'Cluster_lifestyle_labels']])
+
+        # Pairplot for lifestyle factors
+        sns.pairplot(sleep_df3[['Quality of Sleep', 'Sleep Duration', 'Physical Activity Level', 'Stress Level', 'Cluster_lifestyle_labels']], 
+                        hue='Cluster_lifestyle_labels', palette='viridis')
+        st.pyplot(plt)
+
+
+
+        st.title("Cardiovascular Health Factors")
+            
+        kmeans = KMeans(n_clusters=3, random_state=0)
+        sleep_df3['Cluster_cardiovascularH'] = kmeans.fit_predict(sleep_df3[['Quality of Sleep','Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num']])
+
+        centroids = pd.DataFrame(kmeans.cluster_centers_, columns=['Quality of Sleep','Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num'])
+        st.write("Cluster Centroids:")
+        st.write(centroids)
+
+        # Create a mapping of cluster labels based on your new assignment
+        Cluster_cardiovascularH_labels = {
+                0: "Good Sleep",  # Label for Cluster 0
+                1: "Moderate Sleep",    # Label for Cluster 1
+                2: "Bad Sleep"      # Label for Cluster 2
+            }
+
+        sleep_df3['Cluster_cardiovascularH_labels'] = sleep_df3['Cluster_cardiovascularH'].map(Cluster_cardiovascularH_labels)
+
+        sleep_df3[['Quality of Sleep','Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num', 'Cluster_cardiovascularH', 'Cluster_cardiovascularH_labels']]
+
+        sns.pairplot(sleep_df3[['Quality of Sleep','Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num', 'Cluster_cardiovascularH_labels']], 
+                hue='Cluster_cardiovascularH_labels',palette='viridis')
+        st.pyplot(plt)
+
+        st.write("Cluster 0 represents good quality sleep, with an average score of 7.3. Participants have an average heart rate of 69.2 bpm, a BloodPressure_Num of 2.57 (around 132/87), a normal BMI (BMICategory_Num 0.17), and a low prevalence of sleep disorders (SleepDisorder_Num 1). Cluster 1 shows moderate sleep quality, with an average score of 7.1. This group has a slightly elevated heart rate of 74 bpm, a BloodPressure_Num of 16.06 (around 140/90), a tendency towards overweight (BMICategory_Num 2.79), and a moderate likelihood of sleep disorders (SleepDisorder_Num 1.76). Cluster 2 has the lowest quality of sleep, with an average score of 6.9. Participants have a heart rate of 69.3 bpm, a BloodPressure_Num of 10.3 (between 130/85 and 135/90), lean towards overweight (BMICategory_Num 2.14), and show signs of insomnia (SleepDisorder_Num 0.34), indicating poor sleep quality in this group.")
+
+
+
+
+
+
+        st.title('Supervised')
+
+        # Extract unique values for the Sleep Disorder columns
+        unique_sleepD = sleep_df3['Sleep Disorder'].unique()
+        unique_sleepD_num = sleep_df3['SleepDisorder_Num'].unique()
+
+        # Create a new DataFrame with the unique values side-by-side
+        sleepDisorder_unique_values_df = pd.DataFrame({
+        'Unique Column1': unique_sleepD,
+        'Unique Column2': pd.Series(unique_sleepD_num)
+        })
+
+        # Display the result
+        st.write("Sleep Disorder Values")
+        sleepDisorder_unique_values_df
+
+        # Define the features and target based on your selection
+        features = ['Gender_Num', 'Age', 'Occupation_Num', 'Sleep Duration', 'Quality of Sleep',
+                    'Physical Activity Level', 'Stress Level', 'BMICategory_Num', 'BloodPressure_Num',
+                    'Heart Rate', 'Daily Steps']
+        X = sleep_df3[features]
+        y = sleep_df3['SleepDisorder_Num']
+
+        st.code("""
+        # Define the features and target based on your selection
+        features = ['Gender_Num', 'Age', 'Occupation_Num', 'Sleep Duration', 'Quality of Sleep',
+                    'Physical Activity Level', 'Stress Level', 'BMICategory_Num', 'BloodPressure_Num',
+                    'Heart Rate', 'Daily Steps']
+        X = sleep_df3[features]
+        y = sleep_df3['SleepDisorder_Num']
+        """)
+
+        st.write("X values")
+        X
+        st.write("y values")
+        y
+        # Store in session state if needed
+        st.session_state['X_train'] = X
+        st.session_state['y_train'] = y
+
+        # Split the dataset into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+        st.code("""
+        # Split the dataset into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)    
+        """)
+
+        # Display the shapes and head of each set in Streamlit
+        st.write("**X_train Shape:**", X_train.shape)
+        st.write("**X_train Head:**")
+        st.write(X_train.head())
+
+        st.write("**X_test Shape:**", X_test.shape)
+        st.write("**X_test Head:**")
+        st.write(X_test.head())
+
+        st.write("**y_train Shape:**", y_train.shape)
+        st.write("**y_train Head:**")
+        st.write(y_train.head())
+
+        st.write("**y_test Shape:**", y_test.shape)
+        st.write("**y_test Head:**")
+        st.write(y_test.head())
+
+        st.subheader("Train the Decision Tree Classifier")
+        dt_classifier = DecisionTreeClassifier(random_state=42)
+        dt_classifier.fit(X, y)
+
+        st.code("""
+        dt_classifier = DecisionTreeClassifier(random_state=42)
+        dt_classifier.fit(X, y)
+        """)
+        
+
+        st.subheader("Model Evaluation")
+        # Evaluate the model
+        y_pred = dt_classifier.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
+
+        st.code("""
+        y_pred = dt_classifier.predict(X_test)
+        accuracy = accuracy_score(y_test, y_pred)
+        st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
+        """)
+        
+        st.subheader("Feature Importance")
+        feature_importance = dt_classifier.feature_importances_
+        importance_df = pd.DataFrame({
+        'Feature': X.columns,
+        'Importance': feature_importance
+        })
+
+        # Calculate the importance as a percentage
+        importance_df['Importance (%)'] = (importance_df['Importance'] / importance_df['Importance'].sum()) * 100
+
+        # Sort the DataFrame by importance for better readability
+        importance_df = importance_df.sort_values(by='Importance', ascending=False).reset_index(drop=True)
+
+        # Display the resulting DataFrame
+        st.write("**Feature Importance**")
+        st.dataframe(importance_df)
+
+
+
+
+
+
+
+        st.title("Enchanced Supervised Model")
+
+        # Select new features and new target variable
+        Newfeatures = ['BMICategory_Num', 'BloodPressure_Num']
+        NewX = sleep_df3[Newfeatures]
+        NewY = sleep_df3['SleepDisorder_Num']
+
+        st.code("""
+        # Select new features and new target variable
+        Newfeatures = ['BMICategory_Num', 'BloodPressure_Num']
+        NewX = sleep_df3[Newfeatures]
+        NewY = sleep_df3['SleepDisorder_Num']
+        """)
+
+        # Display the selected features and target variable
+        st.subheader("Selected Features and Target Variable")
+        st.write("**Features:**")
+        st.dataframe(NewX)
+        st.write("**Target Variable:**")
+        st.dataframe(NewY)
+
+        # Split the dataset into training and testing sets
+        NewX_train, NewX_test, NewY_train, NewY_test = train_test_split(NewX, NewY, test_size=0.3, random_state=42)
+        
+        # Display shapes and sample data of the training/testing sets
+        st.subheader("Training and Testing Data Overview")
+        st.write("**Training Features Shape:**", NewX_train.shape)
+        st.write("**Training Features Sample:**")
+        st.dataframe(NewX_train.head())
+
+        st.write("**Testing Features Shape:**", NewX_test.shape)
+        st.write("**Testing Features Sample:**")
+        st.dataframe(NewX_test.head())
+
+        st.write("**Training Target Shape:**", NewY_train.shape)
+        st.write("**Training Target Sample:**")
+        st.dataframe(NewY_train.head())
+
+        st.write("**Testing Target Shape:**", NewY_test.shape)
+        st.write("**Testing Target Sample:**")
+        st.dataframe(NewY_test.head())
+
+
+        st.subheader("Train the Decision Tree Classifier")
+
+        st.code("""
+        new_dt_classifier = DecisionTreeClassifier(random_state=42)
+        new_dt_classifier.fit(NewX_train, NewY_train)
+        """)
+
+        # Train the Decision Tree Classifier
+        new_dt_classifier = DecisionTreeClassifier(random_state=42)
+        new_dt_classifier.fit(NewX_train, NewY_train)
+
+        st.subheader("Model Evaluation")
+
+        # Evaluate the model
+        y_pred = new_dt_classifier.predict(NewX_test)
+        accuracy = accuracy_score(NewY_test, y_pred)
+        st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
+
+        st.code("""
+        y_pred = new_dt_classifier.predict(NewX_test)
+        accuracy = accuracy_score(NewY_test, y_pred)
+        st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
+        """)
