@@ -11,9 +11,10 @@ from sklearn.preprocessing import LabelEncoder
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
+import io
 
 # Suppress warnings
-warnings.filterwarnings('ignore')
+warnings.filterwarnings("ignore")
 
 #######################
 # Page configuration
@@ -21,7 +22,7 @@ st.set_page_config(
     page_title="Project Proposal Dashboard",
     page_icon="📊",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 alt.themes.enable("dark")
@@ -29,26 +30,57 @@ alt.themes.enable("dark")
 #######################
 
 # Initialize page_selection in session state if not already set
-if 'page_selection' not in st.session_state:
-    st.session_state.page_selection = 'about'  # Default page
+if "page_selection" not in st.session_state:
+    st.session_state.page_selection = "about"  # Default page
+
 
 # Function to update page_selection
 def set_page_selection(page):
     st.session_state.page_selection = page
 
+
 # Sidebar
 with st.sidebar:
-    st.title('Project Proposal Dashboard')
+    st.title("Project Proposal Dashboard")
     st.subheader("Pages")
 
     # Page Button Navigation
-    st.button("About", use_container_width=True, on_click=set_page_selection, args=('about',))
-    st.button("Dataset", use_container_width=True, on_click=set_page_selection, args=('dataset',))
-    st.button("EDA", use_container_width=True, on_click=set_page_selection, args=('eda',))
-    st.button("Data Cleaning / Pre-processing", use_container_width=True, on_click=set_page_selection, args=('data_cleaning',))
-    st.button("Machine Learning", use_container_width=True, on_click=set_page_selection, args=('machine_learning',))
-    st.button("Prediction", use_container_width=True, on_click=set_page_selection, args=('prediction',))
-    st.button("Conclusion", use_container_width=True, on_click=set_page_selection, args=('conclusion',))
+    st.button(
+        "About", use_container_width=True, on_click=set_page_selection, args=("about",)
+    )
+    st.button(
+        "Dataset",
+        use_container_width=True,
+        on_click=set_page_selection,
+        args=("dataset",),
+    )
+    st.button(
+        "EDA", use_container_width=True, on_click=set_page_selection, args=("eda",)
+    )
+    st.button(
+        "Data Cleaning / Pre-processing",
+        use_container_width=True,
+        on_click=set_page_selection,
+        args=("data_cleaning",),
+    )
+    st.button(
+        "Machine Learning",
+        use_container_width=True,
+        on_click=set_page_selection,
+        args=("machine_learning",),
+    )
+    st.button(
+        "Prediction",
+        use_container_width=True,
+        on_click=set_page_selection,
+        args=("prediction",),
+    )
+    st.button(
+        "Conclusion",
+        use_container_width=True,
+        on_click=set_page_selection,
+        args=("conclusion",),
+    )
 
     # Project Members
     st.subheader("Members")
@@ -131,24 +163,108 @@ elif st.session_state.page_selection == "dataset":
 elif st.session_state.page_selection == "eda":
     st.header("📈 Exploratory Data Analysis (EDA)")
 
-    if 'data' in st.session_state:
+    if "data" in st.session_state:
         data = st.session_state.data
 
-        # Display basic statistics
+        # 1. Display first few rows
+        st.subheader("Dataset Preview")
+        st.dataframe(data.head())
+
+        # 2. Display info (data types and non-null counts)
+        st.subheader("Dataset Info")
+        buffer = io.StringIO()
+        data.info(buf=buffer)
+        s = buffer.getvalue()
+        st.text(s)
+
+        # 3. Basic Statistics
         st.subheader("Basic Statistics")
-        st.write(data.describe())
+        st.dataframe(data.describe())
 
-        # Correlation Matrix
-        st.subheader("Correlation Matrix")
-        corr = data.select_dtypes(include=['float64', 'int64']).corr()
-        plt.figure(figsize=(10, 8))
-        sns.heatmap(corr, annot=True, cmap="coolwarm")
-        st.pyplot(plt)
+        # 4. Unique values in 'Sleep Disorder'
+        if "Sleep Disorder" in data.columns:
+            st.subheader("Unique Sleep Disorder Types")
+            st.write(data["Sleep Disorder"].unique())
 
-        # Pairplot
-        st.subheader("Pairplot")
-        pairplot_fig = sns.pairplot(data.select_dtypes(include=['float64', 'int64']))
-        st.pyplot(pairplot_fig)
+            # 5. Value counts of 'Sleep Disorder'
+            st.subheader("Sleep Disorder Value Counts")
+            st.write(data["Sleep Disorder"].value_counts())
+
+            # 6. Pie Chart of 'Sleep Disorder'
+            st.subheader("Distribution of Sleep Disorder")
+            value_counts = data["Sleep Disorder"].value_counts()
+            fig, ax = plt.subplots()
+            ax.pie(
+                value_counts,
+                labels=value_counts.index,
+                autopct="%1.1f%%",
+                startangle=140,
+            )
+            ax.set_title("Distribution of Sleep Disorder")
+            st.pyplot(fig)
+
+            # 7-18. Scatter plots for various features against 'Sleep Disorder'
+            scatter_features = [
+                "Gender",
+                "Age",
+                "Occupation",
+                "Sleep Duration",
+                "Quality of Sleep",
+                "Physical Activity Level",
+                "Stress Level",
+                "BMI Category",
+                "Blood Pressure",
+                "Heart Rate",
+                "Daily Steps",
+            ]
+
+            for feature in scatter_features:
+                if feature in data.columns:
+                    st.subheader(f"Scatter Plot - Sleep Disorder vs {feature}")
+                    fig, ax = plt.subplots(figsize=(8, 6))
+
+                    # Handling non-numeric columns like Gender, Occupation, and BMI Category
+                    if data[feature].dtype == "object":
+                        sns.scatterplot(
+                            data=data,
+                            x="Sleep Disorder",
+                            y=feature,
+                            hue=feature,
+                            palette="Set1",
+                            ax=ax,
+                        )
+                    else:
+                        sns.scatterplot(
+                            data=data,
+                            x="Sleep Disorder",
+                            y=feature,
+                            hue=feature,
+                            palette="coolwarm",
+                            ax=ax,
+                        )
+
+                    ax.set_xlabel("Sleep Disorder")
+                    ax.set_ylabel(feature)
+                    ax.set_title(f"Scatter Plot of {feature} by Sleep Disorder")
+                    ax.legend(title=feature, bbox_to_anchor=(1.05, 1), loc="upper left")
+                    st.pyplot(fig)
+
+            # 18. Pairplot colored by 'Sleep Disorder'
+            st.subheader("Pairwise Scatter Plots - Features Colored by Sleep Disorder")
+            numeric_cols = data.select_dtypes(include=["float64", "int64"]).columns
+            if len(numeric_cols) > 1:  # Ensure there are numeric features for pairplot
+                pairplot_fig = sns.pairplot(
+                    data[numeric_cols.union(["Sleep Disorder"])],
+                    hue="Sleep Disorder",
+                    palette="viridis",
+                )
+                st.pyplot(pairplot_fig)
+            else:
+                st.warning("Not enough numeric features for pairplot.")
+
+        else:
+            st.warning("'Sleep Disorder' column is not found in the dataset.")
+
     else:
         st.warning("Please upload a dataset in the Dataset page.")
 
@@ -156,7 +272,7 @@ elif st.session_state.page_selection == "eda":
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
 
-    if 'data' in st.session_state:
+    if "data" in st.session_state:
         data = st.session_state.data.copy()
 
         # Display the original dataset for reference
@@ -182,8 +298,8 @@ elif st.session_state.page_selection == "data_cleaning":
 
         # Dropping unused column 'Person ID'
         if st.button("Drop 'Person ID' Column"):
-            if 'Person ID' in data.columns:
-                data = data.drop('Person ID', axis=1)
+            if "Person ID" in data.columns:
+                data = data.drop("Person ID", axis=1)
                 st.session_state.data = data
                 st.success("Dropped 'Person ID' column successfully!")
                 st.write("### Data after dropping 'Person ID':")
@@ -198,7 +314,13 @@ elif st.session_state.page_selection == "data_cleaning":
 
         # Encoding Categorical Variables
         st.subheader("Encoding Categorical Variables")
-        categorical_columns = ['Gender', 'Occupation', 'BMI Category', 'Blood Pressure', 'Sleep Disorder']
+        categorical_columns = [
+            "Gender",
+            "Occupation",
+            "BMI Category",
+            "Blood Pressure",
+            "Sleep Disorder",
+        ]
         if st.checkbox("Show Categorical Columns"):
             st.write("### Categorical Columns:")
             st.write(categorical_columns)
@@ -206,7 +328,7 @@ elif st.session_state.page_selection == "data_cleaning":
         if st.button("Encode Categorical Variables"):
             label_encoders = {}
             for col in categorical_columns:
-                if data[col].dtype == 'object':
+                if data[col].dtype == "object":
                     le = LabelEncoder()
                     data[col] = le.fit_transform(data[col])
                     label_encoders[col] = le
@@ -218,11 +340,11 @@ elif st.session_state.page_selection == "data_cleaning":
         # Train-Test Split Section
         st.subheader("Train-Test Split")
 
-        if 'data' in st.session_state:
+        if "data" in st.session_state:
             data = st.session_state.data
 
             # Ensure that target variable is selected and encoded
-            target = 'Sleep Disorder'  # Set your target variable here
+            target = "Sleep Disorder"  # Set your target variable here
 
             if target not in data.columns:
                 st.error(f"Target column '{target}' not found in the dataset.")
@@ -245,7 +367,9 @@ elif st.session_state.page_selection == "data_cleaning":
 
                     # Display Train-Test Split Details
                     st.write("### Train-Test Split Overview")
-                    st.write("Dataset has been split into training and testing sets with a 70-30 ratio.")
+                    st.write(
+                        "Dataset has been split into training and testing sets with a 70-30 ratio."
+                    )
 
                     st.write("#### X_train (Training Features)")
                     st.dataframe(X_train.head())
@@ -265,7 +389,12 @@ elif st.session_state.page_selection == "data_cleaning":
 elif st.session_state.page_selection == "machine_learning":
     st.header("🤖 Machine Learning")
 
-    if 'X_train' in st.session_state and 'X_test' in st.session_state and 'y_train' in st.session_state and 'y_test' in st.session_state:
+    if (
+        "X_train" in st.session_state
+        and "X_test" in st.session_state
+        and "y_train" in st.session_state
+        and "y_test" in st.session_state
+    ):
         X_train = st.session_state.X_train
         X_test = st.session_state.X_test
         y_train = st.session_state.y_train
@@ -274,7 +403,9 @@ elif st.session_state.page_selection == "machine_learning":
         st.subheader("Model Training and Evaluation")
 
         # Model Selection
-        model_type = st.selectbox("Select Model", ["Decision Tree Classifier", "Random Forest Classifier"])
+        model_type = st.selectbox(
+            "Select Model", ["Decision Tree Classifier", "Random Forest Classifier"]
+        )
 
         if model_type == "Decision Tree Classifier":
             st.markdown("""
@@ -290,7 +421,7 @@ elif st.session_state.page_selection == "machine_learning":
                 dt_classifier = DecisionTreeClassifier(
                     max_depth=max_depth,
                     min_samples_split=min_samples_split,
-                    random_state=42
+                    random_state=42,
                 )
                 dt_classifier.fit(X_train, y_train)
                 st.success("Decision Tree Classifier trained successfully!")
@@ -310,21 +441,27 @@ elif st.session_state.page_selection == "machine_learning":
                 # Confusion Matrix
                 cm = confusion_matrix(y_test, y_pred)
                 fig, ax = plt.subplots()
-                sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=ax)
-                ax.set_xlabel('Predicted')
-                ax.set_ylabel('Actual')
-                ax.set_title('Confusion Matrix')
+                sns.heatmap(cm, annot=True, fmt="d", cmap="Blues", ax=ax)
+                ax.set_xlabel("Predicted")
+                ax.set_ylabel("Actual")
+                ax.set_title("Confusion Matrix")
                 st.pyplot(fig)
 
                 # Feature Importance
                 st.write("**Feature Importance:**")
-                feature_importances = pd.Series(dt_classifier.feature_importances_, index=X_train.columns)
+                feature_importances = pd.Series(
+                    dt_classifier.feature_importances_, index=X_train.columns
+                )
                 st.dataframe(feature_importances.sort_values(ascending=False))
 
                 # Feature Importance Plot
                 fig2, ax2 = plt.subplots()
-                sns.barplot(x=feature_importances.sort_values(ascending=False), y=feature_importances.sort_values(ascending=False).index, ax=ax2)
-                ax2.set_title('Feature Importances')
+                sns.barplot(
+                    x=feature_importances.sort_values(ascending=False),
+                    y=feature_importances.sort_values(ascending=False).index,
+                    ax=ax2,
+                )
+                ax2.set_title("Feature Importances")
                 st.pyplot(fig2)
 
         elif model_type == "Random Forest Classifier":
@@ -339,9 +476,7 @@ elif st.session_state.page_selection == "machine_learning":
 
             if st.button("Train Random Forest Classifier"):
                 rf_classifier = RandomForestClassifier(
-                    n_estimators=n_estimators,
-                    max_depth=max_depth_rf,
-                    random_state=42
+                    n_estimators=n_estimators, max_depth=max_depth_rf, random_state=42
                 )
                 rf_classifier.fit(X_train, y_train)
                 st.success("Random Forest Classifier trained successfully!")
@@ -361,21 +496,27 @@ elif st.session_state.page_selection == "machine_learning":
                 # Confusion Matrix
                 cm_rf = confusion_matrix(y_test, y_pred_rf)
                 fig_rf, ax_rf = plt.subplots()
-                sns.heatmap(cm_rf, annot=True, fmt='d', cmap='Greens', ax=ax_rf)
-                ax_rf.set_xlabel('Predicted')
-                ax_rf.set_ylabel('Actual')
-                ax_rf.set_title('Confusion Matrix')
+                sns.heatmap(cm_rf, annot=True, fmt="d", cmap="Greens", ax=ax_rf)
+                ax_rf.set_xlabel("Predicted")
+                ax_rf.set_ylabel("Actual")
+                ax_rf.set_title("Confusion Matrix")
                 st.pyplot(fig_rf)
 
                 # Feature Importance
                 st.write("**Feature Importance:**")
-                feature_importances_rf = pd.Series(rf_classifier.feature_importances_, index=X_train.columns)
+                feature_importances_rf = pd.Series(
+                    rf_classifier.feature_importances_, index=X_train.columns
+                )
                 st.dataframe(feature_importances_rf.sort_values(ascending=False))
 
                 # Feature Importance Plot
                 fig2_rf, ax2_rf = plt.subplots()
-                sns.barplot(x=feature_importances_rf.sort_values(ascending=False), y=feature_importances_rf.sort_values(ascending=False).index, ax=ax2_rf)
-                ax2_rf.set_title('Feature Importances')
+                sns.barplot(
+                    x=feature_importances_rf.sort_values(ascending=False),
+                    y=feature_importances_rf.sort_values(ascending=False).index,
+                    ax=ax2_rf,
+                )
+                ax2_rf.set_title("Feature Importances")
                 st.pyplot(fig2_rf)
     else:
         st.warning("Please complete the Data Cleaning and Pre-processing steps first.")
@@ -385,15 +526,18 @@ elif st.session_state.page_selection == "prediction":
     st.header("👀 Prediction")
     st.write("This page will handle predictions based on trained models.")
 
-    if 'data' in st.session_state and 'X_train' in st.session_state:
+    if "data" in st.session_state and "X_train" in st.session_state:
         data = st.session_state.data
 
         # Select model type for prediction
-        model_type = st.selectbox("Select Trained Model for Prediction", ["Decision Tree Classifier", "Random Forest Classifier"])
+        model_type = st.selectbox(
+            "Select Trained Model for Prediction",
+            ["Decision Tree Classifier", "Random Forest Classifier"],
+        )
 
         # Load the trained model from session_state if you have saved it
         # For simplicity, retrain the model here (in practice, you might want to save and load models)
-        target = 'Sleep Disorder'  # Ensure this matches your target variable
+        target = "Sleep Disorder"  # Ensure this matches your target variable
 
         if model_type == "Decision Tree Classifier":
             st.subheader("Decision Tree Classifier Prediction")
@@ -406,7 +550,7 @@ elif st.session_state.page_selection == "prediction":
                 dt_classifier = DecisionTreeClassifier(
                     max_depth=max_depth,
                     min_samples_split=min_samples_split,
-                    random_state=42
+                    random_state=42,
                 )
                 dt_classifier.fit(st.session_state.X_train, st.session_state.y_train)
                 st.success("Decision Tree Classifier trained successfully!")
@@ -415,7 +559,9 @@ elif st.session_state.page_selection == "prediction":
                 st.subheader("Input Features for Prediction")
                 input_data = {}
                 for feature in st.session_state.X_train.columns:
-                    input_data[feature] = st.number_input(f"Enter value for {feature}", value=0.0)
+                    input_data[feature] = st.number_input(
+                        f"Enter value for {feature}", value=0.0
+                    )
 
                 input_df = pd.DataFrame([input_data])
 
@@ -435,9 +581,7 @@ elif st.session_state.page_selection == "prediction":
 
             if st.button("Train Random Forest for Prediction"):
                 rf_classifier = RandomForestClassifier(
-                    n_estimators=n_estimators,
-                    max_depth=max_depth_rf,
-                    random_state=42
+                    n_estimators=n_estimators, max_depth=max_depth_rf, random_state=42
                 )
                 rf_classifier.fit(st.session_state.X_train, st.session_state.y_train)
                 st.success("Random Forest Classifier trained successfully!")
@@ -446,7 +590,9 @@ elif st.session_state.page_selection == "prediction":
                 st.subheader("Input Features for Prediction")
                 input_data = {}
                 for feature in st.session_state.X_train.columns:
-                    input_data[feature] = st.number_input(f"Enter value for {feature}", value=0.0)
+                    input_data[feature] = st.number_input(
+                        f"Enter value for {feature}", value=0.0
+                    )
 
                 input_df = pd.DataFrame([input_data])
 
