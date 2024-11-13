@@ -434,152 +434,138 @@ elif st.session_state.page_selection == "eda":
         )
 
         # Scatter plot - Sleep Disorder and Sleep Duration
-        def disorder_and_duration():
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Sleep Duration",
-                hue="Sleep Duration",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Sleep Duration")
-            plt.title("Scatter Plot of Sleep Duration by Sleep Disorder")
-            plt.legend(
-                title="Sleep Duration", bbox_to_anchor=(1.05, 1), loc="upper left"
-            )
-            st.pyplot(plt)
-            st.write(
-                "This plot investigates the correlation between sleep duration and different sleep disorders, providing insight into whether certain disorders are associated with shorter or longer sleep times."
-            )
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Sleep Duration",
+            hue="Sleep Duration",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Sleep Duration")
+        plt.title("Scatter Plot of Sleep Duration by Sleep Disorder")
+        plt.legend(title="Sleep Duration", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This plot investigates the correlation between sleep duration and different sleep disorders, providing insight into whether certain disorders are associated with shorter or longer sleep times."
+        )
 
-            # Scatter plot - Sleep Disorder and Quality of Sleep
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Quality of Sleep",
-                hue="Quality of Sleep",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Quality of Sleep")
-            plt.title("Scatter Plot of Quality of Sleep by Sleep Disorder")
-            plt.legend(
-                title="Quality of Sleep", bbox_to_anchor=(1.05, 1), loc="upper left"
-            )
-            st.pyplot(plt)
-            st.write(
-                "This scatter plot analyzes the reported quality of sleep for individuals with different sleep disorders, allowing you to see if certain disorders are linked to poorer sleep quality."
-            )
+        # Scatter plot - Sleep Disorder and Quality of Sleep
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Quality of Sleep",
+            hue="Quality of Sleep",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Quality of Sleep")
+        plt.title("Scatter Plot of Quality of Sleep by Sleep Disorder")
+        plt.legend(title="Quality of Sleep", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This scatter plot analyzes the reported quality of sleep for individuals with different sleep disorders, allowing you to see if certain disorders are linked to poorer sleep quality."
+        )
 
-            # Scatter plot - Sleep Disorder and Stress Level
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Stress Level",
-                hue="Stress Level",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Stress Level")
-            plt.title("Scatter Plot of Stress Level by Sleep Disorder")
-            plt.legend(title="Stress Level", bbox_to_anchor=(1.05, 1), loc="upper left")
-            st.pyplot(plt)
-            st.write(
-                "This visualization assesses the relationship between stress levels and sleep disorders, which can help identify if stress is a potential contributing factor to specific sleep issues."
-            )
+        # Scatter plot - Sleep Disorder and Stress Level
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Stress Level",
+            hue="Stress Level",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Stress Level")
+        plt.title("Scatter Plot of Stress Level by Sleep Disorder")
+        plt.legend(title="Stress Level", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This visualization assesses the relationship between stress levels and sleep disorders, which can help identify if stress is a potential contributing factor to specific sleep issues."
+        )
 
-            # Scatter plot - Sleep Disorder and BMI Category
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="BMI Category",
-                hue="BMI Category",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("BMI Category")
-            plt.title("Scatter Plot of BMI Category by Sleep Disorder")
-            plt.legend(title="BMI Category", bbox_to_anchor=(1.05, 1), loc="upper left")
-            st.pyplot(plt)
-            st.write(
-                "This plot explores the association between BMI categories (e.g., underweight, normal, overweight) and various sleep disorders, highlighting any weight-related patterns in sleep health."
-            )
+        # Scatter plot - Sleep Disorder and BMI Category
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="BMI Category",
+            hue="BMI Category",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("BMI Category")
+        plt.title("Scatter Plot of BMI Category by Sleep Disorder")
+        plt.legend(title="BMI Category", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This plot explores the association between BMI categories (e.g., underweight, normal, overweight) and various sleep disorders, highlighting any weight-related patterns in sleep health."
+        )
 
-            # Scatter plot - Sleep Disorder and Blood Pressure
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Blood Pressure",
-                hue="Blood Pressure",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Blood Pressure")
-            plt.title("Scatter Plot of Blood Pressure by Sleep Disorder")
-            plt.legend(
-                title="Blood Pressure", bbox_to_anchor=(1.05, 1), loc="upper left"
-            )
-            st.pyplot(plt)
-            st.write(
-                "This scatter plot examines how blood pressure levels correlate with different sleep disorders, potentially revealing if certain conditions are linked to higher or lower blood pressure."
-            )
+        # Scatter plot - Sleep Disorder and Blood Pressure
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Blood Pressure",
+            hue="Blood Pressure",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Blood Pressure")
+        plt.title("Scatter Plot of Blood Pressure by Sleep Disorder")
+        plt.legend(title="Blood Pressure", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This scatter plot examines how blood pressure levels correlate with different sleep disorders, potentially revealing if certain conditions are linked to higher or lower blood pressure."
+        )
 
         # Scatter plot - Sleep Disorder and Heart Rate
-        def sleep_disorder_and_heart_rate():
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Heart Rate",
-                hue="Heart Rate",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Heart Rate")
-            plt.title("Scatter Plot of Heart Rate by Sleep Disorder")
-            plt.legend(title="Heart Rate", bbox_to_anchor=(1.05, 1), loc="upper left")
-            st.pyplot(plt)
-            st.write(
-                "This plot investigates the connection between heart rate and sleep disorders, helping to see if irregular heart rates are prevalent in certain sleep health issues."
-            )
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Heart Rate",
+            hue="Heart Rate",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Heart Rate")
+        plt.title("Scatter Plot of Heart Rate by Sleep Disorder")
+        plt.legend(title="Heart Rate", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This plot investigates the connection between heart rate and sleep disorders, helping to see if irregular heart rates are prevalent in certain sleep health issues."
+        )
 
         # Scatter plot - Sleep Disorder and Daily Steps
-        def sleep_disorder_and_daily_steps():
-            plt.figure(figsize=(8, 6))
-            sns.scatterplot(
-                data=sleep_df3,
-                x="Sleep Disorder",
-                y="Daily Steps",
-                hue="Daily Steps",
-                palette="Set1",
-            )
-            plt.xlabel("Sleep Disorder")
-            plt.ylabel("Daily Steps")
-            plt.title("Scatter Plot of Daily Steps by Sleep Disorder")
-            plt.legend(title="Daily Steps", bbox_to_anchor=(1.05, 1), loc="upper left")
-            st.pyplot(plt)
-            st.write(
-                "This scatter plot visualizes the relationship between physical activity (measured as daily steps) and sleep disorders, which might indicate whether activity levels impact sleep health."
-            )
+        plt.figure(figsize=(8, 6))
+        sns.scatterplot(
+            data=sleep_df3,
+            x="Sleep Disorder",
+            y="Daily Steps",
+            hue="Daily Steps",
+            palette="Set1",
+        )
+        plt.xlabel("Sleep Disorder")
+        plt.ylabel("Daily Steps")
+        plt.title("Scatter Plot of Daily Steps by Sleep Disorder")
+        plt.legend(title="Daily Steps", bbox_to_anchor=(1.05, 1), loc="upper left")
+        st.pyplot(plt)
+        st.write(
+            "This scatter plot visualizes the relationship between physical activity (measured as daily steps) and sleep disorders, which might indicate whether activity levels impact sleep health."
+        )
 
         # Pairwise Scatter plots - Features colored by Species
-        def features_colored_by_species():
-            sns.pairplot(
-                sleep_df3, hue="Sleep Disorder", markers=["o"], palette="viridis"
-            )
-            plt.suptitle(
-                "Scatter Plot Matrix of Sleep Features by Sleep Disorder", y=1.02
-            )
-            st.pyplot(plt)
-            st.write(
-                "This comprehensive pairplot displays multiple scatter plots for various features colored by sleep disorder categories, providing a visual overview of potential relationships between features and sleep disorders."
-            )
+        sns.pairplot(sleep_df3, hue="Sleep Disorder", markers=["o"], palette="viridis")
+        plt.suptitle("Scatter Plot Matrix of Sleep Features by Sleep Disorder", y=1.02)
+        st.pyplot(plt)
+        st.write(
+            "This comprehensive pairplot displays multiple scatter plots for various features colored by sleep disorder categories, providing a visual overview of potential relationships between features and sleep disorders."
+        )
 
 # Machine Learning Page
 elif st.session_state.page_selection == "machine_learning":
