@@ -982,3 +982,39 @@ elif st.session_state.page_selection == "machine_learning":
         accuracy = accuracy_score(NewY_test, y_pred)
         st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
         """)
+
+# Conclusions page
+
+elif st.session_state.page_selection == "conclusion":
+    st.header("📝 Conclusion:")
+    st.markdown("""
+    Sleep is an important factor in our lives as it helps us recharge and gain energy for the day. Typically, it is recommended for adults to get at least 8 hours of sleep each day, though not everyone can achieve this. There are different factors that can affect an individual's ability to get proper sleep. We will analyze the "Sleep Health and Lifestyle Dataset" by Tharamalingam, Laksika to better understand these factors. This dataset provides information on sleep, lifestyle, and cardiovascular health.
+
+    The goal of this project is to...
+    1) Analyze or label if a person gets "Good", "Middle", or "Bad" quality of sleep based on demographic, lifestyle, and cardiovascular health factors (unsupervised model)
+    2) Predict which sleep disorder a person has based on certain factors (supervised model)
+
+    Through data analysis and training of 3 unsupervised and 2 supervised models on the Sleep Health and lifestyle dataset, the key insights and observations are:
+
+    1. Dataset Characteristics
+
+    - The dataset shows the difference in sleep quality depending on different factors that affect the human body. This can matter from what job they have to even what body weight they have. 
+
+    2. Feature Distributions and Separability
+
+    - Based on the different scatter plots, we noticed something specific in regards to the plots regarding Sleep Disorders in regards to Age as well as Sleep Disorders in regards to occupation. 
+
+    - Compared to the different scatter plots, you can see that nearly all of them are balanced except for the ones in regards to age and occupation. 
+
+    - Some occupation have a more common effect to sleep disorders than others like being a software engineer or a scientist and in regards to age, sleep apnea tend to be present at an early to late age while insomnia is more on the younger side of the spectrum. Besides that, there are still some people who have no sleep disorders regardless of their age. 
+
+
+    3. Model Performance ()
+
+    4. Model Performance ()
+
+
+    Summing up:
+
+    Throughout this data science activity, it is evident that the data set "Sleep Health and Lifestyle" is a good dataset to use for classification and prediction. Due to its somewhat balanced yet specific data, it is actually a good data set to use. There were some cleaning up to do in data cleansing but afterwards it was okay to be used. As we can all tell, this data set is not really a precise future visioning of possibilities in regards to Sleep Health and Lifestyle but it can be more of a guide to those who are worried about their sleep.
+""")
