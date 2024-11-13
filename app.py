@@ -22,7 +22,7 @@ warnings.filterwarnings("ignore")
 #######################
 # Page configuration
 st.set_page_config(
-    page_title="Dashboard Template",  # Replace this with your Project's Title
+    page_title="Sleep, Health & Lifestyle Dashboard",  # Replace this with your Project's Title
     page_icon="assets/icon.png",  # You may replace this with a custom icon or emoji related to your project
     layout="wide",
     initial_sidebar_state="expanded",
@@ -45,7 +45,18 @@ def set_page_selection(page):
 # Sidebar
 with st.sidebar:
     # Sidebar Title (Change this with your project's title)
-    st.title("Dashboard Template")
+    st.title("Sleep, Health & Lifestyle Dashboard")
+    st.code("""
+    ∩――――――――――∩     ˗ˏˋ ★ ˎˊ˗
+    ||  ∧  ﾍ  ||                       
+    || (* ´ ▽`)||  < ᴳᵒᵒᵈᴺⁱᵍʰᵗ   ♡
+    |ﾉ^⌒⌒づ`￣  ＼          
+    (　ノ　　⌒ ヽ  ＼
+    ＼　　||￣￣￣￣￣||
+      ＼,ﾉ||
+    """)
+
+    
 
     # Page Button Navigation
     st.subheader("Pages")
@@ -230,17 +241,30 @@ elif st.session_state.page_selection == "dataset":
 elif st.session_state.page_selection == "data_cleaning":
     st.header("🧼 Data Cleaning and Data Pre-processing")
 
-    st.dataframe(sleep_df.head(), use_container_width=True, hide_index=True)  #!
-    st.markdown("""
+    st.subheader("Checking the Dataframe")
 
+    st.write("Previously, None values in Sleep Disorder Column were named \"NaN\", so we replaced said values with \"None\"")
+    st.code("""
+     Replace NaN values with "None" in the 'Sleep Disorder' column
+        sleep_df["Sleep Disorder"] = sleep_df["Sleep Disorder"].fillna("None")
     """)
+    st.dataframe(sleep_df, use_container_width=True, hide_index=True)  #!
 
     # Replace NaN values with "None" in the 'Sleep Disorder' column
     sleep_df["Sleep Disorder"] = sleep_df["Sleep Disorder"].fillna("None")  #!
 
+    st.write("In the sleep_df dataframe, there are now 3 values and the sleep disorder column will not have any null values")
+
     # Pie chart for the sleep disorder column
+
+    st.title("Plots/Charts")
+    st.write("Here are the plots for our Sleep Disorder Column")
     plt.clf()
 
+    st.code("""
+
+
+    """)
     def pie_chart_summary():
         disorder_counts = sleep_df["Sleep Disorder"].value_counts()
         labels = disorder_counts.index
@@ -250,8 +274,33 @@ elif st.session_state.page_selection == "data_cleaning":
         plt.title("Pie Chart of Sleep Disorder")
         st.pyplot(plt)
 
+
     pie_chart_summary()
 
+    st.markdown("""
+    There is a problem in the dataset. The 3 values under sleep disorder are not equally distributed.
+    58.6% people in the dataset has "None" or does not have sleep disorder. 20.6% has insomnia
+    while 20.9% have Sleep Apnea. The three values needs to be equal to ensure 
+    the machine learning models will correctly predict which sleep disorder a person has.   
+
+    __________________________________________
+    The codes below will balance out the data
+    __________________________________________
+    """)
+
+    st.code("""
+    # Count the instances of each value in sleep disorder (label)
+    label_counts = sleep_df[["Sleep Disorder"]].value_counts()
+    # Find the minimum instances among the three values to use as the target count
+    min_count = label_counts.min()
+    # Sample each category to match the minimum count
+    sleep_df3 = (
+        sleep_df.groupby("Sleep Disorder", as_index=False)
+        .apply(lambda x: x.sample(min_count))
+        .reset_index(drop=True)
+    )
+    
+    """)
     # Count the instances of each value in sleep disorder (label)
     label_counts = sleep_df[["Sleep Disorder"]].value_counts()
     # Find the minimum instances among the three values to use as the target count
@@ -264,6 +313,7 @@ elif st.session_state.page_selection == "data_cleaning":
     )
 
     # Pie chart for the sleep disorder column
+    st.write("After Balancing We check again:")
     plt.clf()
 
     def pie_chart_summary1():
@@ -277,12 +327,31 @@ elif st.session_state.page_selection == "data_cleaning":
 
     pie_chart_summary1()
 
+    st.write("The dataset is now balance in the 'sleep_df3' data frame. All 3 values in the sleep disorder column are equally 33.3% ")
+
+    st.write("""
+    Next we Transform the categorical values into numerical using label encoder
+    'Gender', 'Occupation', 'BMI Category', 'Blood Pressure', 'Sleep Disorder'""")
+
+    st.code("""
     encoder = LabelEncoder()
     sleep_df3["Gender_Num"] = encoder.fit_transform(sleep_df3["Gender"])
     sleep_df3["Occupation_Num"] = encoder.fit_transform(sleep_df3["Occupation"])
     sleep_df3["BMICategory_Num"] = encoder.fit_transform(sleep_df3["BMI Category"])
     sleep_df3["BloodPressure_Num"] = encoder.fit_transform(sleep_df3["Blood Pressure"])
     sleep_df3["SleepDisorder_Num"] = encoder.fit_transform(sleep_df3["Sleep Disorder"])
+            
+    # Mapping of the Gender and their encoded equivalent
+    categorical_col = sleep_df3["Gender"].unique()
+    encoded_col = sleep_df3["Gender_Num"].unique()
+    """)
+    encoder = LabelEncoder()
+    sleep_df3["Gender_Num"] = encoder.fit_transform(sleep_df3["Gender"])
+    sleep_df3["Occupation_Num"] = encoder.fit_transform(sleep_df3["Occupation"])
+    sleep_df3["BMICategory_Num"] = encoder.fit_transform(sleep_df3["BMI Category"])
+    sleep_df3["BloodPressure_Num"] = encoder.fit_transform(sleep_df3["Blood Pressure"])
+    sleep_df3["SleepDisorder_Num"] = encoder.fit_transform(sleep_df3["Sleep Disorder"])
+
 
     # Mapping of the Gender and their encoded equivalent
     categorical_col = sleep_df3["Gender"].unique()
@@ -292,10 +361,11 @@ elif st.session_state.page_selection == "data_cleaning":
     gender_mapping_df = pd.DataFrame(
         {"Gender": categorical_col, "Gender_Num": encoded_col}
     )
-
+    st.write("Encoded Equivalent of Gender:")
     # Display the DataFrame
     gender_mapping_df
 
+    st.write("We do the same for every Column, here are their Encoded equivalents:")
     # Mapping of the Occupation and their encoded equivalent
     categorical_col = sleep_df3["Occupation"].unique()
     encoded_col = sleep_df3["Occupation_Num"].unique()
@@ -306,6 +376,7 @@ elif st.session_state.page_selection == "data_cleaning":
     )
 
     # Display the DataFrame
+    st.write("Encoded Equivalent of Occupation:")
     occupation_mapping_df
 
     # Mapping of the BMI Category and their encoded equivalent
@@ -318,6 +389,7 @@ elif st.session_state.page_selection == "data_cleaning":
     )
 
     # Display the DataFrame
+    st.write("Encoded Equivalent of BMI")
     bmi_mapping_df
 
     # Mapping of the BP and their encoded equivalent
@@ -330,6 +402,7 @@ elif st.session_state.page_selection == "data_cleaning":
     )
 
     # Display the DataFrame
+    st.write("Encoded Equivalent of Blood Pressure:")
     bp_mapping_df
 
     # Mapping of the Sleep Disorder and their encoded equivalent
@@ -342,6 +415,7 @@ elif st.session_state.page_selection == "data_cleaning":
     )
 
     # Display the DataFrame
+    st.write("Encoded Equivalent of Sleep Disorders:")
     sleepdisorder_mapping_df
 
     sleep_df3.drop("Person ID", axis=1, inplace=True)
