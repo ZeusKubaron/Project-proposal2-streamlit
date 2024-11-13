@@ -12,6 +12,9 @@ from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
 
+from sklearn.preprocessing import MinMaxScaler
+import numpy as np
+
 import joblib
 
 import warnings
@@ -1076,6 +1079,327 @@ elif st.session_state.page_selection == "machine_learning":
         accuracy = accuracy_score(NewY_test, y_pred)
         st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
         """)
+
+# Prediction Page
+elif st.session_state.page_selection == "prediction":
+    if "sleep_df3" in st.session_state:
+        sleep_df3 = st.session_state["sleep_df3"]
+
+        #st.session_state['kmeans'] = kmeans  # Store the trained model in session state
+
+
+        st.header("🔮 Prediction Page")
+
+        
+        # Unsupervised Part
+        st.title("Unsupervised Models Prediction")
+    
+        col_pred1 = st.columns((3, 3, 3), gap="medium")
+
+        with col_pred1[0]:
+            st.markdown("#### 👥 Demographic Factors")
+
+            # Input value for age under demographic factors
+            dt_age = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='age')
+
+        # Dropdown menus for demographic factors
+        gender_values = ["Male", "Female"]
+        occupation_values = ['Teacher', 
+                          'Accountant', 
+                          'Salesperson',
+                          'Nurse', 
+                          'Lawyer',
+                          'Doctor',
+                          'Engineer',
+                          'Software Engineer',
+                          'Scientist',
+                          'Sales Representative',
+        ]
+
+        # Mapping Gender and Occupation to Numerical Values
+        gender_mapping = {"Male": 1, "Female": 0}
+        occupation_mapping = {'Teacher': 9,
+                              'Accountant':	0,
+                              'Salesperson': 6,
+                              'Nurse': 4, 
+                              'Lawyer':	3,
+                              'Doctor': 1,
+                              'Engineer': 2,
+                              'Software Engineer': 8,
+                              'Scientist': 7,
+                              'Sales Representative': 5}
+
+        # Dropdown Menus
+        dt_gender = st.selectbox("Gender", options=gender_values, index=0, key="dt_gender")
+        dt_occupation = st.selectbox("Occupation", options=occupation_values, index=0, key="dt_occupation")
+
+        # Class labels for prediction
+        classes_list_demoFactor = ["Moderate Sleep", "Good Sleep", "Bad Sleep"]
+
+        # Button to Detect Sleep Quality
+        if st.button("Detect", key="dt_detect"):
+            # Convert categorical inputs to numerical values
+            dt_gender_num = gender_mapping[dt_gender]
+            dt_occupation_num = occupation_mapping[dt_occupation]
+
+            # Prepare the input data for prediction
+            input_data = [[dt_age, dt_gender_num, dt_occupation_num]]
+
+            # Load your CSV file
+            #data = pd.read_csv("your_data.csv")  # Replace with the actual path to your CSV file
+
+            # Assuming your data has columns 'age', 'gender', and 'occupation'
+            # Ensure these columns are present in your dataset
+            #if 'age' in data.columns and 'gender' in data.columns and 'occupation' in data.columns:
+                # Scale the data
+                #scaler = MinMaxScaler()
+                #scaled_data = scaler.fit_transform(data[['age', 'gender', 'occupation']])
+
+                # Train the KMeans model
+            kmeans = KMeans(n_clusters=3, random_state=42)
+            kmeans.fit(scaled_data)
+
+                # Scale the input data
+            scaled_input_data = scaler.transform(input_data)
+
+                # Predict the cluster using the trained KMeans model
+            prediction = kmeans.predict(scaled_input_data)
+
+                # Map the predicted cluster to sleep quality
+            predicted_label = classes_list_demoFactor[prediction[0]]
+
+                # Display the prediction result
+            st.markdown(f"### The predicted sleep quality is: `{predicted_label}`")
+        else:
+            st.error("The required columns ('age', 'gender', 'occupation') are missing from the dataset.")
+
+        with col_pred1[1]:
+            st.markdown("#### 👥 Lifestyle Factors")
+
+        with col_pred1[2]:
+            st.markdown("#### 👥 Cardiovascular health Factors")
+
+
+
+
+
+
+
+    
+    #End of Unsupervised part
+    ##################################################################################
+
+    #Supervised part
+    st.title("Supervised Models Prediction")
+
+    col_pred2 = st.columns((1.5, 3, 3), gap='medium')
+
+    # Initialize session state for clearing results
+    if 'clear' not in st.session_state:
+        st.session_state.clear = False
+
+    with col_pred2[0]:
+        with st.expander('Options', expanded=True):
+            show_dataset = st.checkbox('Show Dataset')
+            show_classes = st.checkbox('Show All Classes')
+            show_none = st.checkbox('Show None')
+            show_insomnia = st.checkbox('Show Insomnia')
+            show_sleepApnea = st.checkbox('Show Sleep Apnea')
+
+            clear_results = st.button('Clear Results', key='clear_results')
+
+            if clear_results:
+
+                st.session_state.clear = True
+    
+
+
+    with col_pred2[1]:
+        st.markdown("####🌲 Decision Tree Classifier")
+        
+        # Dropdown inputs for categorical features
+        gender = st.selectbox('Gender', options=['Male', 'Female'], key='gender', index=0)
+        occupation = st.selectbox('Occupation', 
+                options=['Teacher', 
+                          'Accountant', 
+                          'Salesperson',
+                          'Nurse', 
+                          'Lawyer',
+                          'Doctor',
+                          'Engineer',
+                          'Software Engineer',
+                          'Scientist',
+                          'Sales Representative'], 
+                key='occupation', index=0)
+        
+        bmi_category = st.selectbox('BMI Category', 
+                                    options=['Overweight', 
+                                             'Obese', 
+                                             'Normal'], 
+                                             key='bmi_category', index=0)
+        
+        blood_pressure = st.selectbox('Blood Pressure', 
+                                      options=['135/90',
+                                               '130/85',
+                                               '130/86',
+                                               '115/75',
+                                               '140/95',
+                                               '125/80',
+                                               '142/92',
+                                               '132/87',
+                                               '140/90',
+                                               '129/84',
+                                               '120/80',
+                                               '119/77',
+                                               '125/82',
+                                               '115/78',
+                                               '117/76',
+                                               '128/84',
+                                               '139/91',
+                                               '135/88',
+                                               '131/86'], 
+                                               key='blood_pressure', index=0
+                                    )
+
+
+
+        # Input boxes for numerical features
+        age = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='age')
+        sleep_duration = st.number_input('Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='sleep_duration')
+        quality_of_sleep = st.number_input('Quality of Sleep (4 - 9)', min_value=4, max_value=9, step=1, key='quality_of_sleep')
+        physical_activity_level = st.number_input('Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='physical_activity_level')
+        stress_level = st.number_input('Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='stress_level')
+        heart_rate = st.number_input('Heart Rate [bpm] (65 - 86)', min_value=65, max_value=86, step=1, key='heart_rate')
+        daily_steps = st.number_input('Daily Steps (3000 - 10000)', min_value=3000, max_value=10000, step=100, key='daily_steps')
+
+
+        # Class labels for prediction
+        classes_list = ["None", "Insomnia", "Sleep Apnea"]
+
+        # Button to process or predict
+        if st.button('Detect', key='dt_detect'):
+            # Map categorical inputs to numeric codes 
+            gender_map = {'Male': 0, 'Female': 1}
+            occupation_map = {'Teacher': 9,
+                              'Accountant':	0,
+                              'Salesperson': 6,
+                              'Nurse': 4, 
+                              'Lawyer':	3,
+                              'Doctor': 1,
+                              'Engineer': 2,
+                              'Software Engineer': 8,
+                              'Scientist': 7,
+                              'Sales Representative': 5}
+            bmi_map = {'Overweight', 
+                       'Obese', 
+                       'Normal'}
+            bp_map = {'135/90': 14,
+                      '130/85': 9,
+                      '130/86': 10,
+                      '115/75': 0,
+                      '140/95': 17,
+                      '125/80': 5,
+                      '142/92': 18,
+                      '132/87': 12,
+                      '140/90': 16,
+                      '129/84': 8,
+                      '120/80': 4,
+                      '119/77': 3,
+                      '125/82': 6,
+                      '115/78': 1,
+                      '117/76': 2,
+                      '128/84': 7,
+                      '139/91':	15,
+                      '135/88':	13,
+                      '131/86':	11}
+
+            # Encode categorical inputs
+            Gender_Num = gender_map[gender]
+            Occupation_Num = occupation_map[occupation]
+            BMICategory_Num = bmi_map[bmi_category]
+            BloodPressure_Num = bp_map[blood_pressure]
+
+            # Prepare the input data for the model
+            dt_input_data = [[
+                Gender_Num, 
+                age, 
+                Occupation_Num, 
+                sleep_duration, 
+                quality_of_sleep, 
+                physical_activity_level, 
+                stress_level, 
+                BMICategory_Num, 
+                BloodPressure_Num, 
+                heart_rate, 
+                daily_steps
+            ]]
+
+            # Predict using the Decision Tree Classifier
+            dt_prediction = dt_classifier.predict(dt_input_data)
+
+            # Display the prediction result (adjust classes_list for your specific output classes)
+            st.markdown(f'The predicted outcome is: `{classes_list[dt_prediction[0]]}`')
+
+ 
+    
+    with col_pred2[2]:
+        st.markdown("####🌲🌲🌲 Random Forest Regressor")
+        # empty for the part. just texting the divide thingy
+
+    # Specify the columns to display
+    columns_to_display = ["Gender", 
+                          "Age", 
+                          "Occupation", 
+                          "Sleep Duration", 
+                          "Quality of Sleep", 
+                          "Physical Activity Level", 
+                          "Stress Level", 
+                          "BMI Category", 
+                          "Blood Pressure", 
+                          "Heart Rate", 
+                          "Daily Steps",
+                          "Sleep Disorder"]
+
+    # Create 3 Data Frames containing 5 rows for each Sleep Disorder
+    none_samples = sleep_df3[sleep_df3["Sleep Disorder"] == "None"].head(5)[columns_to_display]
+    insomnia_samples = sleep_df3[sleep_df3["Sleep Disorder"] == "Insomnia"].head(5)[columns_to_display]
+    sleepApnea_samples = sleep_df3[sleep_df3["Sleep Disorder"] == "Sleep Apnea"].head(5)[columns_to_display]
+
+    if show_dataset:
+        st.subheader("Dataset")
+        st.dataframe(sleep_df3[columns_to_display], use_container_width=True, hide_index=True)
+
+    if show_classes:
+        # None Samples
+        st.subheader("None Samples")
+        st.dataframe(none_samples, use_container_width=True, hide_index=True)
+
+        # Insomnia Samples
+        st.subheader("Insomnia Samples")
+        st.dataframe(insomnia_samples, use_container_width=True, hide_index=True)
+
+        # Sleep Apnea Samples
+        st.subheader("Sleep Apnea Samples")
+        st.dataframe(sleepApnea_samples, use_container_width=True, hide_index=True)
+
+    if show_none:
+        # Display the None samples 
+        st.subheader("None Samples")
+        st.dataframe(none_samples, use_container_width=True, hide_index=True)
+
+    if show_insomnia:
+        # Display the Insomnia samples
+        st.subheader("Insomnia Samples")
+        st.dataframe(insomnia_samples, use_container_width=True, hide_index=True)
+
+    if show_sleepApnea:
+        # Display the Sleep Apnea samples
+        st.subheader("Sleep Apnea Samples")
+        st.dataframe(sleepApnea_samples, use_container_width=True, hide_index=True)
+
+
+
+
 
 # Conclusions page
 
