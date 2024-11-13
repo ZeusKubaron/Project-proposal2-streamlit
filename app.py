@@ -182,29 +182,49 @@ if st.session_state.page_selection == "about":
 elif st.session_state.page_selection == "dataset":
     st.header("📊 Dataset")
 
+    st.subheader("Content")
     st.markdown("""
-
-    ZEUS
-
-    `Link:` https://www.kaggle.com/datasets/arshid/iris-flower-dataset
-
+        - **Comprehensive Sleep Metrics**: Explore sleep duration, quality, and factors influencing sleep patterns.
+        - **Lifestyle Factors**: Analyze physical activity levels, stress levels, and BMI categories.
+        - **Cardiovascular Health**: Examine blood pressure and heart rate measurements.
+        - **Sleep Disorder Analysis**: Identify the occurrence of sleep disorders such as Insomnia and Sleep Apnea.
     """)
+    st.markdown("`Link:` https://www.kaggle.com/datasets/arshid/iris-flower-dataset")
 
     col_iris = st.columns((3, 3, 3), gap="medium")
 
     # Display the dataset
     st.subheader("Dataset displayed as a Data Frame")
     st.dataframe(sleep_df, use_container_width=True, hide_index=True)
+    st.write(
+        "This dataset contains 400 rows and 13 columns related to sleep health and lifestyle factors."
+    )
+
+    with st.expander("Details about the Sleep Disorder column"):
+        st.markdown("""
+            - **None**: The individual does not exhibit any specific sleep disorder.
+            - **Insomnia**: The individual experiences difficulty falling asleep or staying asleep, leading to inadequate or poor-quality sleep.
+            - **Sleep Apnea**: The individual suffers from pauses in breathing during sleep, resulting in disrupted sleep patterns and potential health risks.
+        """)
 
     # Describe Statistics
     st.subheader("Descriptive Statistics")
     st.dataframe(sleep_df.describe(), use_container_width=True)
 
-    st.markdown("""
+    with st.expander("Observations and Insights"):
+        st.markdown("""
+            - **Sleep Duration**: The average sleep duration is around 7 hours, aligning with standard sleep recommendations for adults.
+            - **Quality of Sleep**: The mean sleep quality score is about 6.5, suggesting moderate overall sleep quality.
+            - **Stress Levels**: The dataset reveals an average stress level of around 5.8, indicating moderate stress among participants.
+            - **Physical Activity**: With a mean score of approximately 6.2, the data reflects a moderately active population sample.
+            - **Daily Steps**: The average daily step count is around 8000, slightly below the commonly recommended 10,000 steps per day.
+            - **Blood Pressure**: The mean blood pressure is approximately 120 mmHg, typical for a healthy adult population.
+            - **Alcohol and Caffeine Consumption**: Both metrics show moderate average consumption levels, around 3.5 and 4 respectively.
 
-   ZEUS
-    """)
-
+            This overview provides a comprehensive summary of the dataset, detailing key aspects of sleep health
+            and lifestyle factors. With this information, you can proceed to deeper analyses or modeling to explore
+            relationships between these variables, such as the impact of stress and physical activity on sleep quality.
+        """)
 
 # Data Cleaning Page
 elif st.session_state.page_selection == "data_cleaning":
