@@ -144,19 +144,19 @@ if st.session_state.page_selection == "about":
     st.write("""
     # About this Dashboard
 
-    Welcome to the Sleep Health and Lifestyle Dashboard. This dashboard provides insights into how lifestyle factors affect sleep quality, along with predictive modeling based on machine learning algorithms. Below is a brief overview of each component:
+    Welcome to the Sleep Health and Lifestyle Dashboard. This dashboard provides insights into how lifestyle factors affect sleep quality and sleep disorder, along with predictive modeling based on machine learning algorithms. Below is a brief overview of each component:
 
     ---
 
     ### Dataset
-    The **Sleep Health and Lifestyle Dataset** serves as the foundation of this analysis. This dataset captures various health and lifestyle indicators, helping us explore their impact on **Sleep Quality**.
+    The **Sleep Health and Lifestyle Dataset** serves as the foundation of this analysis. This dataset captures various health and lifestyle indicators, helping us explore their impact on **Sleep Quality** and **Sleep Disorder**.
 
     ---
 
     ### Exploratory Data Analysis (EDA)
-    **EDA (Exploratory Data Analysis)** offers a comprehensive look into sleep quality and its relationship with lifestyle factors. Key visualizations include:
-    - **Pie Charts** representing distribution of sleep health categories
-    - **Scatter Plots** depicting relationships between lifestyle variables and sleep quality
+    **EDA (Exploratory Data Analysis)** offers a comprehensive look into sleep disorder and its relationship with lifestyle factors. Key visualizations include:
+    - **Pie Charts** representing distribution of sleep disorder categories
+    - **Scatter Plots** depicting relationships between lifestyle variables and sleep disorder
 
     These visualizations help us understand patterns and trends in the data.
 
@@ -164,7 +164,7 @@ if st.session_state.page_selection == "about":
 
     ### Data Cleaning and Pre-processing
     Our data cleaning and pre-processing steps include essential tasks such as:
-    - Encoding categorical variables (e.g., sleep quality categories)
+    - Encoding categorical variables (e.g., sleep disorder categories)
     - Splitting the dataset into **training and testing sets**
 
     These steps ensure that our data is ready for effective model training and evaluation.
@@ -172,9 +172,9 @@ if st.session_state.page_selection == "about":
     ---
 
     ### Machine Learning Models
-    We employed a mix of **unsupervised and supervised models** to analyze and predict sleep quality:
+    We employed a mix of **unsupervised and supervised models** to analyze and predict sleep quality and sleep disorder:
     - **3 Unsupervised Models** for clustering individuals based on lifestyle and health factors
-    - **2 Supervised Models** to classify sleep quality based on health and lifestyle inputs
+    - **2 Supervised Models** to classify sleep disorder based on health and lifestyle inputs
 
     ---
 
@@ -184,7 +184,7 @@ if st.session_state.page_selection == "about":
     ---
 
     ### Conclusion
-    This section summarizes key insights and observations from the **EDA** and **model training** phases. We also highlight findings and patterns discovered throughout the analysis process, offering a well-rounded perspective on how lifestyle impacts sleep quality.
+    This section summarizes key insights and observations from the **EDA** and **model training** phases. We also highlight findings and patterns discovered throughout the analysis process, offering a well-rounded perspective on how lifestyle impacts sleep quality and sleep disorder.
 
     ---
 
@@ -233,7 +233,6 @@ elif st.session_state.page_selection == "dataset":
             - **Physical Activity**: With a mean score of approximately 6.2, the data reflects a moderately active population sample.
             - **Daily Steps**: The average daily step count is around 8000, slightly below the commonly recommended 10,000 steps per day.
             - **Blood Pressure**: The mean blood pressure is approximately 120 mmHg, typical for a healthy adult population.
-            - **Alcohol and Caffeine Consumption**: Both metrics show moderate average consumption levels, around 3.5 and 4 respectively.
 
             This overview provides a comprehensive summary of the dataset, detailing key aspects of sleep health
             and lifestyle factors. With this information, you can proceed to deeper analyses or modeling to explore
@@ -691,33 +690,38 @@ elif st.session_state.page_selection == "machine_learning":
         - BMI Category
         - Sleep Disorder
         """)
-        st.title("Demographic Factors")
-
         sleep_df3 = st.session_state.get("sleep_df3")
+        
+        st.title("Demographic Factors")
 
         kmeans = KMeans(n_clusters=3, random_state=0)
         sleep_df3["Cluster_demographic"] = kmeans.fit_predict(
             sleep_df3[["Quality of Sleep", "Age", "Gender_Num", "Occupation_Num"]]
         )
 
+
         centroids = pd.DataFrame(
             kmeans.cluster_centers_,
             columns=["Quality of Sleep", "Age", "Gender_Num", "Occupation_Num"],
         )
+        
 
         # Display centroids in the Streamlit app
         st.write("Cluster Centroids:")
         st.write(centroids)
 
+        # Sort clusters by the Quality of Sleep centroid value
+        sorted_centroids = centroids.sort_values(by="Quality of Sleep").reset_index()
+
         st.write(
-            "Based on the calculated center value of each clusters, cluster 1 has the highest quality of sleep, followed by cluster 0, while cluster 2 has the lowest."
+            "Based on the calculated center value of Quality of Sleep, the highest will be labeled Good Sleep, the lowest is Bad Sleep, and the middle centriods is the Moderate Sleep"
         )
 
         # Create a mapping of cluster labels based on your new assignment
-        Cluster_demographic_labels = {
-            0: "Moderate Sleep",  # Label for Cluster 0
-            1: "Good Sleep",    # Label for Cluster 1
-            2: "Bad Sleep"      # Label for Cluster 2
+        Cluster_demographic_labels = { 
+            sorted_centroids.loc[0, "index"]: "Bad Sleep",        # Lowest Quality of Sleep
+            sorted_centroids.loc[1, "index"]: "Moderate Sleep",  # Middle Quality of Sleep
+            sorted_centroids.loc[2, "index"]: "Good Sleep",      # Highest Quality of Sleep
         }
 
         sleep_df3["Cluster_demographic_labels"] = sleep_df3["Cluster_demographic"].map(
@@ -751,9 +755,10 @@ elif st.session_state.page_selection == "machine_learning":
         st.pyplot(plt)
 
         st.write(
-            "Cluster 1 represents good quality sleep, with the highest average score of 7.7.  The people are aged about 53.5 years, mostly women (Gender_Num 0.05), and are probably teachers or similar (Occupation_Num 4.05). Cluster 0 has moderate sleep quality, averaging a score of 6.8. Its people are younger, around 33.9 years old, with a slight male majority (Gender_Num 0.76), and and most probably engineers (Occupation_Num 2.82). Cluster 2 has the lowest average score of 6.7 of quality of sleep, with an average age of 43.7 years, a balanced gender distribution (Gender_Num 0.59), and an Occupation_Num of 7.25 suggests many are software engineers."
+            "Showcase the Pairwise Scatter Plots of the Demographic Factors"
         )
 
+        ############################################
         st.title("Lifestyle Factors")
 
         kmeans = KMeans(n_clusters=3, random_state=0)
@@ -764,6 +769,7 @@ elif st.session_state.page_selection == "machine_learning":
                     "Sleep Duration",
                     "Physical Activity Level",
                     "Stress Level",
+                    "Daily Steps"
                 ]
             ]
         )
@@ -776,16 +782,24 @@ elif st.session_state.page_selection == "machine_learning":
                 "Sleep Duration",
                 "Physical Activity Level",
                 "Stress Level",
+                "Daily Steps"
             ],
         )
         st.write("Lifestyle Cluster Centroids:")
         st.write(centroids)
 
-        # Create a mapping for the lifestyle cluster labels (same as original)
-        Cluster_lifestyle_labels = {
-            0: "Good Sleep",  # Label for Cluster 0
-            1: "Bad Sleep",  # Label for Cluster 1
-            2: "Moderate Sleep",  # Label for Cluster 2
+        # Sort clusters by the Quality of Sleep centroid value
+        sorted_centroids_lifestyle = centroids.sort_values(by="Quality of Sleep").reset_index()
+
+        st.write(
+            "Based on the calculated center value of Quality of Sleep, the highest will be labeled Good Sleep, the lowest is Bad Sleep, and the middle centriods is the Moderate Sleep"
+        )
+
+        # Create a mapping of cluster labels based on your new assignment
+        Cluster_lifestyle_labels = { 
+            sorted_centroids.loc[0, "index"]: "Bad Sleep",        # Lowest Quality of Sleep
+            sorted_centroids.loc[1, "index"]: "Moderate Sleep",  # Middle Quality of Sleep
+            sorted_centroids.loc[2, "index"]: "Good Sleep",      # Highest Quality of Sleep
         }
 
         sleep_df3["Cluster_lifestyle_labels"] = sleep_df3["Cluster_lifestyle"].map(
@@ -800,6 +814,7 @@ elif st.session_state.page_selection == "machine_learning":
                     "Sleep Duration",
                     "Physical Activity Level",
                     "Stress Level",
+                    "Daily Steps", 
                     "Cluster_lifestyle",
                     "Cluster_lifestyle_labels",
                 ]
@@ -814,6 +829,7 @@ elif st.session_state.page_selection == "machine_learning":
                     "Sleep Duration",
                     "Physical Activity Level",
                     "Stress Level",
+                    "Daily Steps",
                     "Cluster_lifestyle_labels",
                 ]
             ],
@@ -822,21 +838,27 @@ elif st.session_state.page_selection == "machine_learning":
         )
         st.pyplot(plt)
 
+        st.write(
+            "Showcase the Pairwise Scatter Plots of the Lifestyle Factors"
+        )
+
+        ######################
         st.title("Cardiovascular Health Factors")
 
         kmeans = KMeans(n_clusters=3, random_state=0)
         sleep_df3["Cluster_cardiovascularH"] = kmeans.fit_predict(
             sleep_df3[
                 [
-                    "Quality of Sleep",
-                    "Heart Rate",
-                    "BloodPressure_Num",
-                    "BMICategory_Num",
-                    "SleepDisorder_Num",
+                "Quality of Sleep",
+                "Heart Rate",
+                "BloodPressure_Num",
+                "BMICategory_Num",
+                "SleepDisorder_Num"
                 ]
             ]
         )
 
+        # Display centroids for cardiovascular health clustering
         centroids = pd.DataFrame(
             kmeans.cluster_centers_,
             columns=[
@@ -844,21 +866,28 @@ elif st.session_state.page_selection == "machine_learning":
                 "Heart Rate",
                 "BloodPressure_Num",
                 "BMICategory_Num",
-                "SleepDisorder_Num",
+                "SleepDisorder_Num"
             ],
         )
-        st.write("Cluster Centroids:")
+
+        st.write("Cardiovascular Health Cluster Centroids:")
         st.write(centroids)
 
+        # Sort clusters by the Quality of Sleep centroid value
+        sorted_centroids_cardiovascularH = centroids.sort_values(by="Quality of Sleep").reset_index()
+
+        st.write(
+            "Based on the calculated center value of Quality of Sleep, the highest will be labeled Good Sleep, the lowest is Bad Sleep, and the middle centriods is the Moderate Sleep"
+        )
+
         # Create a mapping of cluster labels based on your new assignment
-        Cluster_cardiovascularH_labels = {
-            0: "Good Sleep",  # Label for Cluster 0
-            1: "Moderate Sleep",  # Label for Cluster 1
-            2: "Bad Sleep",  # Label for Cluster 2
+        Cluster_cardiovascularH_labels = { 
+            sorted_centroids.loc[0, "index"]: "Bad Sleep",        # Lowest Quality of Sleep
+            sorted_centroids.loc[1, "index"]: "Moderate Sleep",  # Middle Quality of Sleep
+            sorted_centroids.loc[2, "index"]: "Good Sleep",      # Highest Quality of Sleep
         }
 
-        sleep_df3["Cluster_cardiovascularH_labels"] = sleep_df3[
-            "Cluster_cardiovascularH"
+        sleep_df3["Cluster_cardiovascularH_labels"] = sleep_df3["Cluster_cardiovascularH"
         ].map(Cluster_cardiovascularH_labels)
 
         sleep_df3[
@@ -890,8 +919,12 @@ elif st.session_state.page_selection == "machine_learning":
         st.pyplot(plt)
 
         st.write(
-            "Cluster 0 represents good quality sleep, with an average score of 7.3. Participants have an average heart rate of 69.2 bpm, a BloodPressure_Num of 2.57 (around 132/87), a normal BMI (BMICategory_Num 0.17), and a low prevalence of sleep disorders (SleepDisorder_Num 1). Cluster 1 shows moderate sleep quality, with an average score of 7.1. This group has a slightly elevated heart rate of 74 bpm, a BloodPressure_Num of 16.06 (around 140/90), a tendency towards overweight (BMICategory_Num 2.79), and a moderate likelihood of sleep disorders (SleepDisorder_Num 1.76). Cluster 2 has the lowest quality of sleep, with an average score of 6.9. Participants have a heart rate of 69.3 bpm, a BloodPressure_Num of 10.3 (between 130/85 and 135/90), lean towards overweight (BMICategory_Num 2.14), and show signs of insomnia (SleepDisorder_Num 0.34), indicating poor sleep quality in this group."
+            "Showcase the Pairwise Scatter Plots of the Cardiovascular Health Factors"
         )
+
+        #End of unsupervised
+        #################################################
+
 
         st.title("Supervised")
 
@@ -1093,6 +1126,8 @@ elif st.session_state.page_selection == "prediction":
         # Unsupervised Part
         st.title("Unsupervised Models Prediction")
 
+        st.markdown("Analyze and label if a person gets 'Good', 'Middle', or 'Bad' quality of sleep based on certain factors")
+
         col_pred0 = st.columns((1, 4), gap="medium")
 
         with col_pred0[0]:
@@ -1117,45 +1152,23 @@ elif st.session_state.page_selection == "prediction":
             columnsdisplay_all = ["Gender", "Age", "Occupation", "Sleep Duration", "Quality of Sleep", 
                                 "Physical Activity Level", "Stress Level", "BMI Category", "Blood Pressure", 
                                 "Heart Rate", "Daily Steps", "Sleep Disorder"]
-            columnsdisplay_demoFac = ["Gender", "Age", "Occupation", "Cluster_demographic_labels"]
-            columnsdisplay_lifeFac = ["Sleep Duration", "Physical Activity Level", "Stress Level", "Cluster_lifestyle_labels"]
-            columnsdisplay_cardioFac = ["Heart Rate", "Blood Pressure", "BMI Category", "Sleep Disorder", "Cluster_cardiovascularH_labels"]
+            columnsdisplay_demoFac = ["Gender", "Age", "Occupation"]
+            columnsdisplay_lifeFac = ["Sleep Duration", "Physical Activity Level", "Stress Level", "Daily Steps"]
+            columnsdisplay_cardioFac = ["Heart Rate", "Blood Pressure", "BMI Category", "Sleep Disorder"]
 
             # Display 3 samples for each factors in unsupervised model
-            def display_samples_by_cluster(df, column_to_group, columns_to_display, samples_per_group=3):
-                grouped_samples = (
-                    df.groupby(column_to_group)
-                    .apply(lambda x: x.head(samples_per_group))
-                    .reset_index(drop=True)
-                )
-                st.dataframe(grouped_samples[columns_to_display], use_container_width=True, hide_index=True)
-
+            
             if show_classes_unsupervised or show_demoFac:
                 st.subheader("Demographic Samples")
-                display_samples_by_cluster(
-                    sleep_df3, 
-                    column_to_group="Cluster_demographic_labels", 
-                    columns_to_display=columnsdisplay_demoFac, 
-                    samples_per_group=3
-                )
+                st.dataframe(sleep_df3[columnsdisplay_demoFac].head(10), use_container_width=True, hide_index=True)
             
             if show_classes_unsupervised or show_lifeFac:
                 st.subheader("Lifestyle Samples")
-                display_samples_by_cluster(
-                    sleep_df3, 
-                    column_to_group="Cluster_lifestyle_labels", 
-                    columns_to_display=columnsdisplay_lifeFac, 
-                    samples_per_group=3
-                )
+                st.dataframe(sleep_df3[columnsdisplay_lifeFac].head(10), use_container_width=True, hide_index=True)
 
             if show_classes_unsupervised or show_cardioFac:
                 st.subheader("Cardiovascular Health Samples Samples")
-                display_samples_by_cluster(
-                    sleep_df3, 
-                    column_to_group="Cluster_cardiovascularH_labels", 
-                    columns_to_display=columnsdisplay_cardioFac, 
-                    samples_per_group=3
-                )
+                st.dataframe(sleep_df3[columnsdisplay_cardioFac].head(10), use_container_width=True, hide_index=True)
 
             if show_dataset_unsupervised:
                 st.subheader("Dataset")
@@ -1163,7 +1176,6 @@ elif st.session_state.page_selection == "prediction":
 
             if st.session_state.clear:
                 st.write("Clearing results...")
-                # Add any specific clearing logic here
                 st.session_state.clear = False
 
        
@@ -1213,7 +1225,7 @@ elif st.session_state.page_selection == "prediction":
             classes_list_demoFactor = sleep_df3['Cluster_demographic_labels'].unique()
 
             # Button to Detect Sleep Quality
-            if st.button("Detect", key="dt_detect_demoFactor"):
+            if st.button("Label", key="dt_detect_demoFactor"):
                 # Convert categorical inputs to numerical values
                 dt_gender_num = gender_mapping[dt_gender_demoFactor]
                 dt_occupation_num = occupation_mapping[dt_occupation_demoFactor]
@@ -1237,47 +1249,50 @@ elif st.session_state.page_selection == "prediction":
                 predicted_label_demoFactor = classes_list_demoFactor[prediction_demoFactor[0]]
 
                 # Display the result
-                st.markdown(f"### The predicted sleep quality is: `{predicted_label_demoFactor}`")
+                st.markdown(f"### The label sleep quality is: `{predicted_label_demoFactor}`")
            
 
-        with col_pred1[1]:
-            st.markdown("#### 👥 Lifestyle Factors")
+       
+            with col_pred1[1]:
+                st.markdown("#### 👥 Lifestyle Factors")
 
-            # Input values for lifestyle factors
-            dt_sleepduration_lifeFactor = st.number_input('Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='dt_sleepduration_lifeFactor')
-            dt_physicalactivitylevel_lifeFactor = st.number_input('Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='dt_physicalactivitylevel_lifeFactor')
-            dt_stresslevel_lifeFactor = st.number_input('Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='dt_stresslevel_lifeFactor')
+                # Input values for lifestyle factors
+                dt_sleepduration_lifeFactor = st.number_input(
+                    'Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='dt_sleepduration_lifeFactor')
+                dt_physicalactivitylevel_lifeFactor = st.number_input(
+                    'Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='dt_physicalactivitylevel_lifeFactor')
+                dt_stresslevel_lifeFactor = st.number_input(
+                    'Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='dt_stresslevel_lifeFactor')
+                dt_dailysteps_lifeFactor = st.number_input(
+                    'Daily Steps (3000 - 10000)', min_value=3000, max_value=10000, step=100, key='dt_dailysteps_lifeFactor')
 
+                # Class labels for prediction
+                classes_list_lifeFactor = sleep_df3['Cluster_cardiovascularH_labels'].unique()
 
-            # Class labels for prediction
-            classes_list_lifeFactor = sleep_df3['Cluster_lifestyle_labels'].unique()
+                    # Button to Detect Sleep Quality
+                if st.button("Label", key="dt_detect_lifeFactor"):
+                        # Prepare the input data for prediction
+                    # Prepare the input data for prediction using encoded values
+                    input_data_lifeFactor = [[dt_sleepduration_lifeFactor, dt_physicalactivitylevel_lifeFactor, dt_stresslevel_lifeFactor, dt_dailysteps_lifeFactor]]
 
-            # Button to Detect Sleep Quality
-            if st.button("Detect", key="dt_detect_lifeFactor"):
-                # Prepare the input data for prediction using encoded values
-                input_data = [[dt_sleepduration_lifeFactor, 
-                               dt_physicalactivitylevel_lifeFactor, 
-                               dt_stresslevel_lifeFactor]]
+                    # Assuming sleep_df3 is available and preprocessed
+                    kmeans_lifeFactor = KMeans(n_clusters=3, random_state=42)
 
-                # Assuming sleep_df3 is available and preprocessed
-                kmeans_lifeFactor = KMeans(n_clusters=3, random_state=42)
+                    # Train the model (this happens every time the app runs)
+                    kmeans_lifeFactor.fit(sleep_df3[['Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num']])
 
-                # Train the model (this happens every time the app runs)
-                kmeans_lifeFactor.fit(sleep_df3[['Sleep Duration', 'Physical Activity Level', 'Stress Level']])
+                    # Prepare the input data for prediction (same as before)
+                    input_data_lifeFactor = [[dt_sleepduration_lifeFactor, dt_physicalactivitylevel_lifeFactor, dt_stresslevel_lifeFactor, dt_dailysteps_lifeFactor]]
 
-                # Prepare the input data for prediction (same as before)
-                input_data_lifeFactor = [[dt_sleepduration_lifeFactor, 
-                               dt_physicalactivitylevel_lifeFactor, 
-                               dt_stresslevel_lifeFactor]]
+                    # Make the prediction
+                    prediction_lifeFactor = kmeans_lifeFactor.predict(input_data_lifeFactor)
 
-                # Make the prediction
-                prediction_lifeFactor = kmeans_lifeFactor.predict(input_data)
+                    # Map the predicted cluster to sleep quality
+                    predicted_label_lifeFactor = classes_list_lifeFactor[prediction_lifeFactor[0]]
 
-                # Map the predicted cluster to sleep quality
-                predicted_label_lifeFactor = classes_list_lifeFactor[prediction_lifeFactor[0]]
+                        # Display the result
+                    st.markdown(f"### The label sleep quality label is: `{predicted_label_lifeFactor}`")
 
-                # Display the result
-                st.markdown(f"### The predicted sleep quality is: `{predicted_label_lifeFactor}`")
 
         with col_pred1[2]:
             st.markdown("#### 👥 Cardiovascular health Factors")
@@ -1353,7 +1368,7 @@ elif st.session_state.page_selection == "prediction":
 
 
             # Button to Detect Sleep Quality
-            if st.button("Detect", key="dt_detect_cardioFactor"):
+            if st.button("Label", key="dt_detect_cardioFactor"):
                 # Convert categorical inputs to numerical values
                 dt_bloodpressure_num = bloodpressure_mapping[dt_bloodpressure_cardioFactor]
                 dt_bmicategory_num = bmicategory_mapping[dt_bmicategory_cardioFactor]
@@ -1378,7 +1393,7 @@ elif st.session_state.page_selection == "prediction":
                 predicted_label_cardioFactor = classes_list_cardioFactor[prediction_cardioFactor[0]]
 
                 # Display the result
-                st.markdown(f"### The predicted sleep quality is: `{predicted_label_cardioFactor}`")
+                st.markdown(f"### The label sleep quality is: `{predicted_label_cardioFactor}`")
            
 
 
@@ -1393,6 +1408,8 @@ elif st.session_state.page_selection == "prediction":
 
     #Supervised part
     st.title("Supervised Models Prediction")
+    st.markdown("Detect if a person has a sleep disorder and which kind based on certain factors")
+
 
     col_pred2 = st.columns((1.5, 3, 3), gap='medium')
 
@@ -1620,7 +1637,7 @@ elif st.session_state.page_selection == "conclusion":
 
     1. Dataset Characteristics
 
-    - The dataset shows the difference in sleep quality depending on different factors that affect the human body. This can matter from what job they have to even what body weight they have. 
+    - The dataset shows the difference in sleep quality/sleep disorder depending on different factors that affect the human body. This can matter from what job they have to even what body weight they have. 
 
     2. Feature Distributions and Separability
 
