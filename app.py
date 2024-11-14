@@ -11,6 +11,7 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt
 import seaborn as sns
+from PIL import Image
 
 from sklearn.preprocessing import MinMaxScaler
 import numpy as np
@@ -128,12 +129,21 @@ sleep_df = pd.read_csv("data/Sleep_health_and_lifestyle_dataset.csv")
 
 # Importing models
 dt_classifier = joblib.load("assets/models/decision_tree_model.joblib")
+rfr_classifier = joblib.load('assets/models/random_forest_regressor.joblib')
 
-# rfr_classifier = joblib.load('assets/models/random_forest_regressor.joblib')
 features = ["BMICategory_Num", "BloodPressure_Num"]
 disorder_list = ["Insomnia", "None", "Sleep-Apnea	"]
 
 #######################
+def feature_importance_plot(feature_importance_df, width, height, key):
+    # Generate a bar plot for feature importances
+    feature_importance_fig = px.bar(
+        feature_importance_df,
+        x='Importance',
+        y='Feature',
+        labels={'Importance': 'Importance Score', 'Feature': 'Feature'},
+        orientation='h'  # Horizontal bar plot
+    )
 
 # Pages
 
@@ -1113,6 +1123,70 @@ elif st.session_state.page_selection == "machine_learning":
         st.write(f"**Accuracy:** {accuracy * 100:.2f}%")
         """)
 
+        #Train the Random Forest Regressor
+        st.subheader("Train the Random Forest Regressor")
+        st.code("""
+                    rfr_classifier = RandomForestRegressor()
+                    rfr_classifier.fit(X_train, y_train)     
+                """)
+
+        st.subheader("Model Evaluation")
+
+        st.code("""
+                    train_accuracy = rfr_classifier.score(X_train, y_train) #train daTa
+                    test_accuracy = rfr_classifier.score(X_test, y_test) #test daTa
+
+                    print(f'Train Accuracy: {train_accuracy * 100:.2f}%')
+                    print(f'Test Accuracy: {test_accuracy * 100:.2f}%') 
+               """)
+
+        st.write("""
+                    **Train Accuracy:** 98.58%\n
+                     **Test Accuracy:** 99.82%                
+                """)
+        st.subheader("Feature Importance")
+
+        st.code("""
+                    random_forest_feature_importance = pd.Series(rfr_classifier.feature_importances_, index=X_train.columns)
+                    random_forest_feature_importance
+                """)
+
+        rfr_feature_importance = {
+        'Feature': ['BMICategory_Num', 'BloodPressure_Num'],
+        'Importance': [0.21843, 0.78157]
+        }
+
+        rfr_feature_importance_df = pd.DataFrame(rfr_feature_importance)
+
+        st.dataframe(rfr_feature_importance_df, use_container_width=True, hide_index=True)
+
+        feature_importance_plot(rfr_feature_importance_df, 500, 500, 2)
+
+        st.markdown("""
+                    Upon running `.feature_importances` in the `Random Forest Regressor Model` to check how each sleep disorder's features influence the training of our model, it is clear that **BloodPressure_Num** holds the most influence in our model's decisions having **0.78** or **78%** importance. Then **BMICategory_Num** which is far behind with **0.22** or **22%** importance.
+                    """)
+        
+        st.subheader("Number of Trees")
+        st.code("""
+                    print(f"Number of trees made: {len(rfr_classifier.estimators_)}")    
+                """)
+
+        st.markdown("**Number of trees made:** 100")
+
+        st.subheader("Plotting the Forest")
+
+        forest_image = Image.open('assets/models/RFRForest.png')
+        st.image(forest_image, caption='Random Forest Regressor - Forest Plot')
+
+        st.markdown("This graph shows **all of the decision trees** made by our **Random Forest Regressor** model which then forms a **Forest**.")
+
+        st.subheader("Forest - Single Tree")
+
+        forest_single_tree_image = Image.open('assets/models/RFRSingle.png')
+        st.image(forest_single_tree_image, caption='Random Forest Regressor - Single Tree')
+
+        st.markdown("This **Tree Plot** shows a single tree from our Random Forest Regressor model.")
+
 # Prediction Page
 elif st.session_state.page_selection == "prediction":
     if "sleep_df3" in st.session_state:
@@ -1565,7 +1639,127 @@ elif st.session_state.page_selection == "prediction":
     
     with col_pred2[2]:
         st.markdown("#### 🌲🌲🌲 Random Forest Regressor")
-        # empty for the part. just texting the divide thingy
+        # Dropdown inputs for categorical features
+        gender = st.selectbox('Gender', options=['Male', 'Female'], key='gender1', index=0)
+        occupation = st.selectbox('Occupation', 
+                options=['Teacher', 
+                          'Accountant', 
+                          'Salesperson',
+                          'Nurse', 
+                          'Lawyer',
+                          'Doctor',
+                          'Engineer',
+                          'Software Engineer',
+                          'Scientist',
+                          'Sales Representative'], 
+                key='occupation1', index=0)
+        
+        bmi_category = st.selectbox('BMI Category', 
+                                    options=['Overweight', 
+                                             'Obese', 
+                                             'Normal'], 
+                                             key='bmi_category1', index=0)
+        
+        blood_pressure = st.selectbox('Blood Pressure', 
+                                      options=['135/90',
+                                               '130/85',
+                                               '130/86',
+                                               '115/75',
+                                               '140/95',
+                                               '125/80',
+                                               '142/92',
+                                               '132/87',
+                                               '140/90',
+                                               '129/84',
+                                               '120/80',
+                                               '119/77',
+                                               '125/82',
+                                               '115/78',
+                                               '117/76',
+                                               '128/84',
+                                               '139/91',
+                                               '135/88',
+                                               '131/86'], 
+                                               key='blood_pressure1', index=0
+                                    )
+
+
+
+        # Input boxes for numerical features
+        age = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='age1')
+        sleep_duration = st.number_input('Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='sleep_duration1')
+        quality_of_sleep = st.number_input('Quality of Sleep (4 - 9)', min_value=4, max_value=9, step=1, key='quality_of_sleep1')
+        physical_activity_level = st.number_input('Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='physical_activity_level1')
+        stress_level = st.number_input('Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='stress_level1')
+        heart_rate = st.number_input('Heart Rate [bpm] (65 - 86)', min_value=65, max_value=86, step=1, key='heart_rate1')
+        daily_steps = st.number_input('Daily Steps (3000 - 10000)', min_value=3000, max_value=10000, step=100, key='daily_steps1')
+
+        # Class labels for prediction
+        classes_list = ["None", "Insomnia", "Sleep Apnea"]
+
+        # Button to process or predict
+        if st.button('Detect', key='rfr_detect_RandomForestClassifier'):
+            # Map categorical inputs to numeric codes 
+            gender_map = {'Male': 0, 'Female': 1}
+            occupation_map = {'Teacher': 9,
+                              'Accountant':	0,
+                              'Salesperson': 6,
+                              'Nurse': 4, 
+                              'Lawyer':	3,
+                              'Doctor': 1,
+                              'Engineer': 2,
+                              'Software Engineer': 8,
+                              'Scientist': 7,
+                              'Sales Representative': 5}
+            bmi_map = {'Overweight': 1, 
+                       'Obese': 2, 
+                       'Normal': 0}
+            bp_map = {'135/90': 14,
+                      '130/85': 9,
+                      '130/86': 10,
+                      '115/75': 0,
+                      '140/95': 17,
+                      '125/80': 5,
+                      '142/92': 18,
+                      '132/87': 12,
+                      '140/90': 16,
+                      '129/84': 8,
+                      '120/80': 4,
+                      '119/77': 3,
+                      '125/82': 6,
+                      '115/78': 1,
+                      '117/76': 2,
+                      '128/84': 7,
+                      '139/91':	15,
+                      '135/88':	13,
+                      '131/86':	11}
+
+            # Encode categorical inputs
+            Gender_Num = gender_map[gender]
+            Occupation_Num = occupation_map[occupation]
+            BMICategory_Num = bmi_map[bmi_category]
+            BloodPressure_Num = bp_map[blood_pressure]
+
+            # Prepare the input data for the model
+            dt_input_data = [[
+                Gender_Num, 
+                age, 
+                Occupation_Num, 
+                sleep_duration, 
+                quality_of_sleep, 
+                physical_activity_level, 
+                stress_level, 
+                BMICategory_Num, 
+                BloodPressure_Num, 
+                heart_rate, 
+                daily_steps
+            ]]
+
+            # Predict using the Random Forest Regressor
+            rfr_prediction = rfr_classifier.predict(dt_input_data)
+
+            # Display the prediction result (adjust classes_list for your specific output classes)
+            st.markdown(f'The predicted outcome is: `{classes_list[dt_prediction[0]]}`')
 
     # Specify the columns to display
     columns_to_display = ["Gender", 
