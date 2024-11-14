@@ -716,8 +716,8 @@ elif st.session_state.page_selection == "machine_learning":
         # Create a mapping of cluster labels based on your new assignment
         Cluster_demographic_labels = {
             0: "Moderate Sleep",  # Label for Cluster 0
-            1: "Good Sleep",  # Label for Cluster 1
-            2: "Bad Sleep",  # Label for Cluster 2
+            1: "Good Sleep",    # Label for Cluster 1
+            2: "Bad Sleep"      # Label for Cluster 2
         }
 
         sleep_df3["Cluster_demographic_labels"] = sleep_df3["Cluster_demographic"].map(
@@ -1085,7 +1085,6 @@ elif st.session_state.page_selection == "prediction":
     if "sleep_df3" in st.session_state:
         sleep_df3 = st.session_state["sleep_df3"]
 
-        #st.session_state['kmeans'] = kmeans  # Store the trained model in session state
 
 
         st.header("🔮 Prediction Page")
@@ -1093,91 +1092,294 @@ elif st.session_state.page_selection == "prediction":
         
         # Unsupervised Part
         st.title("Unsupervised Models Prediction")
+
+        col_pred0 = st.columns((1, 4), gap="medium")
+
+        with col_pred0[0]:
+
+            if 'clear' not in st.session_state:
+                st.session_state.clear = False
+
+            with st.expander('Options', expanded=True):
+                show_dataset_unsupervised = st.checkbox('Show Dataset')
+                show_classes_unsupervised = st.checkbox('Show All Classes')
+                show_demoFac = st.checkbox('Show Demographic Factors')
+                show_lifeFac = st.checkbox('Show Lifestyle Factors')
+                show_cardioFac = st.checkbox('Show Cardiovascular Health Factors')
+
+                clear_results_unsupervised = st.button('Clear Results', key='clear_results_unsupervised')
+
+                if clear_results_unsupervised:
+                    st.session_state.clear = True
+        
+        with col_pred0[1]:
+            # Define the columns to display
+            columnsdisplay_all = ["Gender", "Age", "Occupation", "Sleep Duration", "Quality of Sleep", 
+                                "Physical Activity Level", "Stress Level", "BMI Category", "Blood Pressure", 
+                                "Heart Rate", "Daily Steps", "Sleep Disorder"]
+            columnsdisplay_demoFac = ["Gender", "Age", "Occupation", "Cluster_demographic_labels"]
+            columnsdisplay_lifeFac = ["Sleep Duration", "Physical Activity Level", "Stress Level", "Cluster_lifestyle_labels"]
+            columnsdisplay_cardioFac = ["Heart Rate", "Blood Pressure", "BMI Category", "Sleep Disorder", "Cluster_cardiovascularH_labels"]
+
+            # Display 3 samples for each factors in unsupervised model
+            def display_samples_by_cluster(df, column_to_group, columns_to_display, samples_per_group=3):
+                grouped_samples = (
+                    df.groupby(column_to_group)
+                    .apply(lambda x: x.head(samples_per_group))
+                    .reset_index(drop=True)
+                )
+                st.dataframe(grouped_samples[columns_to_display], use_container_width=True, hide_index=True)
+
+            if show_classes_unsupervised or show_demoFac:
+                st.subheader("Demographic Samples")
+                display_samples_by_cluster(
+                    sleep_df3, 
+                    column_to_group="Cluster_demographic_labels", 
+                    columns_to_display=columnsdisplay_demoFac, 
+                    samples_per_group=3
+                )
+            
+            if show_classes_unsupervised or show_lifeFac:
+                st.subheader("Lifestyle Samples")
+                display_samples_by_cluster(
+                    sleep_df3, 
+                    column_to_group="Cluster_lifestyle_labels", 
+                    columns_to_display=columnsdisplay_lifeFac, 
+                    samples_per_group=3
+                )
+
+            if show_classes_unsupervised or show_cardioFac:
+                st.subheader("Cardiovascular Health Samples Samples")
+                display_samples_by_cluster(
+                    sleep_df3, 
+                    column_to_group="Cluster_cardiovascularH_labels", 
+                    columns_to_display=columnsdisplay_cardioFac, 
+                    samples_per_group=3
+                )
+
+            if show_dataset_unsupervised:
+                st.subheader("Dataset")
+                st.dataframe(sleep_df3[columnsdisplay_all], use_container_width=True, hide_index=True)
+
+            if st.session_state.clear:
+                st.write("Clearing results...")
+                # Add any specific clearing logic here
+                st.session_state.clear = False
+
+       
+##############################
+
+
     
         col_pred1 = st.columns((3, 3, 3), gap="medium")
 
         with col_pred1[0]:
             st.markdown("#### 👥 Demographic Factors")
+    
+            # Input value for demographic factors
+            dt_age_demoFactor = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='dt_age_demoFactor')
 
-            # Input value for age under demographic factors
-            dt_age = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='age')
+            # Dropdown menus for demographic factors
+            gender_values = ["Male", "Female"]
+            occupation_values = ['Teacher', 
+                                'Accountant', 
+                                'Salesperson',
+                                'Nurse', 
+                                'Lawyer',
+                                'Doctor',
+                                'Engineer',
+                                'Software Engineer',
+                                'Scientist',
+                                'Sales Representative']
 
-        # Dropdown menus for demographic factors
-        gender_values = ["Male", "Female"]
-        occupation_values = ['Teacher', 
-                          'Accountant', 
-                          'Salesperson',
-                          'Nurse', 
-                          'Lawyer',
-                          'Doctor',
-                          'Engineer',
-                          'Software Engineer',
-                          'Scientist',
-                          'Sales Representative',
-        ]
+            # Mapping Gender and Occupation to Numerical Values
+            gender_mapping = {"Male": 1, "Female": 0}
+            occupation_mapping = {'Teacher': 9,
+                                'Accountant': 0,
+                                'Salesperson': 6,
+                                'Nurse': 4, 
+                                'Lawyer': 3,
+                                'Doctor': 1,
+                                'Engineer': 2,
+                                'Software Engineer': 8,
+                                'Scientist': 7,
+                                'Sales Representative': 5}
 
-        # Mapping Gender and Occupation to Numerical Values
-        gender_mapping = {"Male": 1, "Female": 0}
-        occupation_mapping = {'Teacher': 9,
-                              'Accountant':	0,
-                              'Salesperson': 6,
-                              'Nurse': 4, 
-                              'Lawyer':	3,
-                              'Doctor': 1,
-                              'Engineer': 2,
-                              'Software Engineer': 8,
-                              'Scientist': 7,
-                              'Sales Representative': 5}
+            # Dropdown Menus
+            dt_gender_demoFactor = st.selectbox("Gender", options=gender_values, index=0, key="dt_genderage_demoFactor")
+            dt_occupation_demoFactor = st.selectbox("Occupation", options=occupation_values, index=0, key="dt_occupationage_demoFactor")
 
-        # Dropdown Menus
-        dt_gender = st.selectbox("Gender", options=gender_values, index=0, key="dt_gender")
-        dt_occupation = st.selectbox("Occupation", options=occupation_values, index=0, key="dt_occupation")
+            # Class labels for prediction
+            classes_list_demoFactor = sleep_df3['Cluster_demographic_labels'].unique()
 
-        # Class labels for prediction
-        classes_list_demoFactor = ["Moderate Sleep", "Good Sleep", "Bad Sleep"]
+            # Button to Detect Sleep Quality
+            if st.button("Detect", key="dt_detect_demoFactor"):
+                # Convert categorical inputs to numerical values
+                dt_gender_num = gender_mapping[dt_gender_demoFactor]
+                dt_occupation_num = occupation_mapping[dt_occupation_demoFactor]
 
-        # Button to Detect Sleep Quality
-        if st.button("Detect", key="dt_detect"):
-            # Convert categorical inputs to numerical values
-            dt_gender_num = gender_mapping[dt_gender]
-            dt_occupation_num = occupation_mapping[dt_occupation]
+                # Prepare the input data for prediction using encoded values
+                input_data_demoFactor = [[dt_age_demoFactor, dt_gender_num, dt_occupation_num]]
 
-            # Prepare the input data for prediction
-            input_data = [[dt_age, dt_gender_num, dt_occupation_num]]
+                # Assuming sleep_df3 is available and preprocessed
+                kmeans_demoFactor = KMeans(n_clusters=3, random_state=42)
 
-            # Load your CSV file
-            #data = pd.read_csv("your_data.csv")  # Replace with the actual path to your CSV file
+                # Train the model (this happens every time the app runs)
+                kmeans_demoFactor.fit(sleep_df3[['Age', 'Gender_Num', 'Occupation_Num']])
 
-            # Assuming your data has columns 'age', 'gender', and 'occupation'
-            # Ensure these columns are present in your dataset
-            #if 'age' in data.columns and 'gender' in data.columns and 'occupation' in data.columns:
-                # Scale the data
-                #scaler = MinMaxScaler()
-                #scaled_data = scaler.fit_transform(data[['age', 'gender', 'occupation']])
+                # Prepare the input data for prediction (same as before)
+                input_data_demoFactor = [[dt_age_demoFactor, dt_gender_num, dt_occupation_num]]
 
-                # Train the KMeans model
-            kmeans = KMeans(n_clusters=3, random_state=42)
-            kmeans.fit(scaled_data)
-
-                # Scale the input data
-            scaled_input_data = scaler.transform(input_data)
-
-                # Predict the cluster using the trained KMeans model
-            prediction = kmeans.predict(scaled_input_data)
+                # Make the prediction
+                prediction_demoFactor = kmeans_demoFactor.predict(input_data_demoFactor)
 
                 # Map the predicted cluster to sleep quality
-            predicted_label = classes_list_demoFactor[prediction[0]]
+                predicted_label_demoFactor = classes_list_demoFactor[prediction_demoFactor[0]]
 
-                # Display the prediction result
-            st.markdown(f"### The predicted sleep quality is: `{predicted_label}`")
-        else:
-            st.error("The required columns ('age', 'gender', 'occupation') are missing from the dataset.")
+                # Display the result
+                st.markdown(f"### The predicted sleep quality is: `{predicted_label_demoFactor}`")
+           
 
         with col_pred1[1]:
             st.markdown("#### 👥 Lifestyle Factors")
 
+            # Input values for lifestyle factors
+            dt_sleepduration_lifeFactor = st.number_input('Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='dt_sleepduration_lifeFactor')
+            dt_physicalactivitylevel_lifeFactor = st.number_input('Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='dt_physicalactivitylevel_lifeFactor')
+            dt_stresslevel_lifeFactor = st.number_input('Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='dt_stresslevel_lifeFactor')
+
+
+            # Class labels for prediction
+            classes_list_lifeFactor = sleep_df3['Cluster_lifestyle_labels'].unique()
+
+            # Button to Detect Sleep Quality
+            if st.button("Detect", key="dt_detect_lifeFactor"):
+                # Prepare the input data for prediction using encoded values
+                input_data = [[dt_sleepduration_lifeFactor, 
+                               dt_physicalactivitylevel_lifeFactor, 
+                               dt_stresslevel_lifeFactor]]
+
+                # Assuming sleep_df3 is available and preprocessed
+                kmeans_lifeFactor = KMeans(n_clusters=3, random_state=42)
+
+                # Train the model (this happens every time the app runs)
+                kmeans_lifeFactor.fit(sleep_df3[['Sleep Duration', 'Physical Activity Level', 'Stress Level']])
+
+                # Prepare the input data for prediction (same as before)
+                input_data_lifeFactor = [[dt_sleepduration_lifeFactor, 
+                               dt_physicalactivitylevel_lifeFactor, 
+                               dt_stresslevel_lifeFactor]]
+
+                # Make the prediction
+                prediction_lifeFactor = kmeans_lifeFactor.predict(input_data)
+
+                # Map the predicted cluster to sleep quality
+                predicted_label_lifeFactor = classes_list_lifeFactor[prediction_lifeFactor[0]]
+
+                # Display the result
+                st.markdown(f"### The predicted sleep quality is: `{predicted_label_lifeFactor}`")
+
         with col_pred1[2]:
             st.markdown("#### 👥 Cardiovascular health Factors")
+
+            # Input value for demographic factors
+            dt_heartrate_cardioFactor = st.number_input('Heart Rate [bpm] (65 - 86)', min_value=65, max_value=86, step=1, key='dt_heartrate_cardioFactor')
+
+
+            # Dropdown menus for demographic factors
+            bloodpressure_values = ['135/90',
+                             '130/85',
+                             '130/86',
+                             '115/75',
+                             '140/95',
+                             '125/80',
+                             '142/92',
+                             '132/87',
+                             '140/90',
+                             '129/84',
+                             '120/80',
+                             '119/77',
+                             '125/82',
+                             '115/78',
+                             '117/76',
+                             '128/84',
+                             '139/91',
+                             '135/88',
+                             '131/86']
+            bmicategory_values = ['Overweight', 
+                                  'Obese', 
+                                  'Normal',
+                                  'Normal Weight']
+            sleepdisorder_values = ['None', 
+                                  'Insomnia', 
+                                  'Sleep Apnea']
+
+            # Mapping Gender and Occupation to Numerical Values
+            bloodpressure_mapping = {'135/90': 14,
+                              '130/85': 9,
+                              '130/86': 10,
+                              '115/75': 0,
+                              '140/95': 17,
+                              '125/80': 5,
+                              '142/92': 18,
+                              '132/87': 12,
+                              '140/90': 16,
+                              '129/84': 8,
+                              '120/80': 4,
+                              '119/77': 3,
+                              '125/82': 6,
+                              '115/78': 1,
+                              '117/76': 2,
+                              '128/84': 7,
+                              '139/91':	15,
+                              '135/88':	13,
+                              '131/86':	11}
+            bmicategory_mapping = {'Overweight': 3, 
+                                  'Obese': 2, 
+                                  'Normal': 0,
+                                  'Normal Weight': 1}
+            sleepdisorder_mapping = {'None': 1, 
+                                     'Insomnia': 0,
+                                     'Sleep Apnea': 2}
+
+            # Dropdown Menus
+            dt_bloodpressure_cardioFactor = st.selectbox("Blood Pressure", options=bloodpressure_values, index=0, key="dt_bloodpressure_values")
+            dt_bmicategory_cardioFactor = st.selectbox("BMI Categort", options=bmicategory_values, index=0, key="dt_bmicategory_cardioFactor")
+            dt_sleepdisorder_cardioFactor = st.selectbox("Sleep Disorder", options=sleepdisorder_values, index=0, key="dt_sleepdisorder_cardioFactor")
+
+
+            # Class labels for prediction
+            classes_list_cardioFactor = sleep_df3['Cluster_cardiovascularH_labels'].unique()
+
+
+            # Button to Detect Sleep Quality
+            if st.button("Detect", key="dt_detect_cardioFactor"):
+                # Convert categorical inputs to numerical values
+                dt_bloodpressure_num = bloodpressure_mapping[dt_bloodpressure_cardioFactor]
+                dt_bmicategory_num = bmicategory_mapping[dt_bmicategory_cardioFactor]
+                dt_sleepdisorder_num = sleepdisorder_mapping[dt_sleepdisorder_cardioFactor]
+
+                # Prepare the input data for prediction using encoded values
+                input_data_cardioFactor = [[dt_heartrate_cardioFactor, dt_bloodpressure_num, dt_bmicategory_num, dt_sleepdisorder_num]]
+
+                # Assuming sleep_df3 is available and preprocessed
+                kmeans_cardioFactor = KMeans(n_clusters=3, random_state=42)
+
+                # Train the model (this happens every time the app runs)
+                kmeans_cardioFactor.fit(sleep_df3[['Heart Rate', 'BloodPressure_Num', 'BMICategory_Num', 'SleepDisorder_Num']])
+
+                # Prepare the input data for prediction (same as before)
+                input_data_cardioFactor = [[dt_heartrate_cardioFactor, dt_bloodpressure_num, dt_bmicategory_num, dt_sleepdisorder_num]]
+
+                # Make the prediction
+                prediction_cardioFactor = kmeans_cardioFactor.predict(input_data_cardioFactor)
+
+                # Map the predicted cluster to sleep quality
+                predicted_label_cardioFactor = classes_list_cardioFactor[prediction_cardioFactor[0]]
+
+                # Display the result
+                st.markdown(f"### The predicted sleep quality is: `{predicted_label_cardioFactor}`")
+           
 
 
 
@@ -1186,7 +1388,7 @@ elif st.session_state.page_selection == "prediction":
 
 
     
-    #End of Unsupervised part
+    #End of Unsupervised parts
     ##################################################################################
 
     #Supervised part
@@ -1200,11 +1402,13 @@ elif st.session_state.page_selection == "prediction":
 
     with col_pred2[0]:
         with st.expander('Options', expanded=True):
-            show_dataset = st.checkbox('Show Dataset')
-            show_classes = st.checkbox('Show All Classes')
-            show_none = st.checkbox('Show None')
-            show_insomnia = st.checkbox('Show Insomnia')
-            show_sleepApnea = st.checkbox('Show Sleep Apnea')
+            # Assign unique keys to each checkbox
+            show_dataset_supervised = st.checkbox('Show Dataset', key='show_dataset_supervised')
+            show_classes_supervised = st.checkbox('Show All Classes', key='show_classes_supervised')
+            show_none = st.checkbox('Show None Samples', key='show_none')
+            show_insomnia = st.checkbox('Show Insomnia Samples', key='show_insomnia')
+            show_sleepApnea = st.checkbox('Show Sleep Apnea Samples', key='show_sleep_apnea')
+
 
             clear_results = st.button('Clear Results', key='clear_results')
 
@@ -1215,7 +1419,7 @@ elif st.session_state.page_selection == "prediction":
 
 
     with col_pred2[1]:
-        st.markdown("####🌲 Decision Tree Classifier")
+        st.markdown("#### 🌲 Decision Tree Classifier")
         
         # Dropdown inputs for categorical features
         gender = st.selectbox('Gender', options=['Male', 'Female'], key='gender', index=0)
@@ -1277,7 +1481,7 @@ elif st.session_state.page_selection == "prediction":
         classes_list = ["None", "Insomnia", "Sleep Apnea"]
 
         # Button to process or predict
-        if st.button('Detect', key='dt_detect'):
+        if st.button('Detect', key='dt_detect_DecisionTreeClassifier'):
             # Map categorical inputs to numeric codes 
             gender_map = {'Male': 0, 'Female': 1}
             occupation_map = {'Teacher': 9,
@@ -1343,7 +1547,7 @@ elif st.session_state.page_selection == "prediction":
  
     
     with col_pred2[2]:
-        st.markdown("####🌲🌲🌲 Random Forest Regressor")
+        st.markdown("#### 🌲🌲🌲 Random Forest Regressor")
         # empty for the part. just texting the divide thingy
 
     # Specify the columns to display
@@ -1365,11 +1569,11 @@ elif st.session_state.page_selection == "prediction":
     insomnia_samples = sleep_df3[sleep_df3["Sleep Disorder"] == "Insomnia"].head(5)[columns_to_display]
     sleepApnea_samples = sleep_df3[sleep_df3["Sleep Disorder"] == "Sleep Apnea"].head(5)[columns_to_display]
 
-    if show_dataset:
+    if show_dataset_supervised:
         st.subheader("Dataset")
         st.dataframe(sleep_df3[columns_to_display], use_container_width=True, hide_index=True)
 
-    if show_classes:
+    if show_classes_supervised:
         # None Samples
         st.subheader("None Samples")
         st.dataframe(none_samples, use_container_width=True, hide_index=True)
