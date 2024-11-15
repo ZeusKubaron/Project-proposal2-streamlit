@@ -1575,43 +1575,49 @@ elif st.session_state.page_selection == "prediction":
         if st.button('Detect', key='dt_detect_DecisionTreeClassifier'):
             # Map categorical inputs to numeric codes 
             gender_map = {'Male': 0, 'Female': 1}
-            occupation_map = {'Teacher': 9,
-                              'Accountant':	0,
-                              'Salesperson': 6,
-                              'Nurse': 4, 
-                              'Lawyer':	3,
-                              'Doctor': 1,
-                              'Engineer': 2,
-                              'Software Engineer': 8,
-                              'Scientist': 7,
-                              'Sales Representative': 5}
-            bmi_map = {'Overweight', 
-                       'Obese', 
-                       'Normal'}
-            bp_map = {'135/90': 14,
-                      '130/85': 9,
-                      '130/86': 10,
-                      '115/75': 0,
-                      '140/95': 17,
-                      '125/80': 5,
-                      '142/92': 18,
-                      '132/87': 12,
-                      '140/90': 16,
-                      '129/84': 8,
-                      '120/80': 4,
-                      '119/77': 3,
-                      '125/82': 6,
-                      '115/78': 1,
-                      '117/76': 2,
-                      '128/84': 7,
-                      '139/91':	15,
-                      '135/88':	13,
-                      '131/86':	11}
+            occupation_map = {
+                'Teacher': 9,
+                'Accountant': 0,
+                'Salesperson': 6,
+                'Nurse': 4, 
+                'Lawyer': 3,
+                'Doctor': 1,
+                'Engineer': 2,
+                'Software Engineer': 8,
+                'Scientist': 7,
+                'Sales Representative': 5
+            }
+            bmi_map = {  # Fixed to a dictionary
+                'Overweight': 1,
+                'Obese': 2,
+                'Normal': 0
+            }
+            bp_map = {
+                '135/90': 14,
+                '130/85': 9,
+                '130/86': 10,
+                '115/75': 0,
+                '140/95': 17,
+                '125/80': 5,
+                '142/92': 18,
+                '132/87': 12,
+                '140/90': 16,
+                '129/84': 8,
+                '120/80': 4,
+                '119/77': 3,
+                '125/82': 6,
+                '115/78': 1,
+                '117/76': 2,
+                '128/84': 7,
+                '139/91': 15,
+                '135/88': 13,
+                '131/86': 11
+            }
 
             # Encode categorical inputs
             Gender_Num = gender_map[gender]
             Occupation_Num = occupation_map[occupation]
-            BMICategory_Num = bmi_map[bmi_category]
+            BMICategory_Num = bmi_map[bmi_category]  # Fixed
             BloodPressure_Num = bp_map[blood_pressure]
 
             # Prepare the input data for the model
@@ -1635,24 +1641,12 @@ elif st.session_state.page_selection == "prediction":
             # Display the prediction result (adjust classes_list for your specific output classes)
             st.markdown(f'The predicted outcome is: `{classes_list[dt_prediction[0]]}`')
 
+
  
     
     with col_pred2[2]:
         st.markdown("#### 🌲🌲🌲 Random Forest Regressor")
         # Dropdown inputs for categorical features
-        gender = st.selectbox('Gender', options=['Male', 'Female'], key='gender1', index=0)
-        occupation = st.selectbox('Occupation', 
-                options=['Teacher', 
-                          'Accountant', 
-                          'Salesperson',
-                          'Nurse', 
-                          'Lawyer',
-                          'Doctor',
-                          'Engineer',
-                          'Software Engineer',
-                          'Scientist',
-                          'Sales Representative'], 
-                key='occupation1', index=0)
         
         bmi_category = st.selectbox('BMI Category', 
                                     options=['Overweight', 
@@ -1683,34 +1677,12 @@ elif st.session_state.page_selection == "prediction":
                                                key='blood_pressure1', index=0
                                     )
 
-
-
-        # Input boxes for numerical features
-        age = st.number_input('Age (27 - 60)', min_value=27, max_value=60, step=1, key='age1')
-        sleep_duration = st.number_input('Sleep Duration (5 - 9)', min_value=5.0, max_value=9.0, step=0.1, key='sleep_duration1')
-        quality_of_sleep = st.number_input('Quality of Sleep (4 - 9)', min_value=4, max_value=9, step=1, key='quality_of_sleep1')
-        physical_activity_level = st.number_input('Physical Activity Level (30 - 90)', min_value=30, max_value=90, step=1, key='physical_activity_level1')
-        stress_level = st.number_input('Stress Level (3 - 8)', min_value=3, max_value=8, step=1, key='stress_level1')
-        heart_rate = st.number_input('Heart Rate [bpm] (65 - 86)', min_value=65, max_value=86, step=1, key='heart_rate1')
-        daily_steps = st.number_input('Daily Steps (3000 - 10000)', min_value=3000, max_value=10000, step=100, key='daily_steps1')
-
         # Class labels for prediction
         classes_list = ["None", "Insomnia", "Sleep Apnea"]
 
         # Button to process or predict
         if st.button('Detect', key='rfr_detect_RandomForestClassifier'):
             # Map categorical inputs to numeric codes 
-            gender_map = {'Male': 0, 'Female': 1}
-            occupation_map = {'Teacher': 9,
-                              'Accountant':	0,
-                              'Salesperson': 6,
-                              'Nurse': 4, 
-                              'Lawyer':	3,
-                              'Doctor': 1,
-                              'Engineer': 2,
-                              'Software Engineer': 8,
-                              'Scientist': 7,
-                              'Sales Representative': 5}
             bmi_map = {'Overweight': 1, 
                        'Obese': 2, 
                        'Normal': 0}
@@ -1735,31 +1707,27 @@ elif st.session_state.page_selection == "prediction":
                       '131/86':	11}
 
             # Encode categorical inputs
-            Gender_Num = gender_map[gender]
-            Occupation_Num = occupation_map[occupation]
             BMICategory_Num = bmi_map[bmi_category]
             BloodPressure_Num = bp_map[blood_pressure]
 
             # Prepare the input data for the model
-            dt_input_data = [[
-                Gender_Num, 
-                age, 
-                Occupation_Num, 
-                sleep_duration, 
-                quality_of_sleep, 
-                physical_activity_level, 
-                stress_level, 
+            dt_input_data = [[ 
                 BMICategory_Num, 
                 BloodPressure_Num, 
-                heart_rate, 
-                daily_steps
             ]]
 
             # Predict using the Random Forest Regressor
             rfr_prediction = rfr_classifier.predict(dt_input_data)
 
-            # Display the prediction result (adjust classes_list for your specific output classes)
-            st.markdown(f'The predicted outcome is: `{classes_list[dt_prediction[0]]}`')
+            # Convert the prediction to an integer index
+            predicted_index = int(round(rfr_prediction[0]))  # Round and cast to integer
+
+            # Ensure the predicted index is within bounds of the classes_list
+            if 0 <= predicted_index < len(classes_list):
+                st.markdown(f'The predicted outcome is: `{classes_list[predicted_index]}`')
+            else:
+                st.error("The prediction is out of range. Please check your model output.")
+
 
     # Specify the columns to display
     columns_to_display = ["Gender", 
