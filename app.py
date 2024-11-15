@@ -1810,10 +1810,18 @@ elif st.session_state.page_selection == "conclusion":
     - Some occupation have a more common effect to sleep disorders than others like being a software engineer or a scientist and in regards to age, sleep apnea tend to be present at an early to late age while insomnia is more on the younger side of the spectrum. Besides that, there are still some people who have no sleep disorders regardless of their age. 
 
 
-    3. Model Performance ()
+    3. Model Performance (Decision Tree Classifier)
+    In regards to the Model Performance of the Decision Tree Classifier, we got an accuracy of 71.43%. 
+    The top 3 features of importance are BloodPressure_Num (0.526885), BMI Category_Num (0.342760), and 
+    Sleep Duration (0.092312). The enhanced supervised model got an accuracy of 75.1%.
+    Roughly 3.33 increase in accuracy compared to the original Decision Tree Classifier.
 
-    4. Model Performance ()
-
+    4. Model Performance (Random Forest Regressor)
+    In regards to the Model Performance of the Random Forest Regressor, it got a train accuracy of 87.56% 
+    and test accuracy of 19.84%. The calculated feature importance is BMI category (0.247572%) 
+    and Blood Pressure  (0.752428 %). From this information, BMI and Blood Pressure is a big factor
+    when identifying a sleep disorder. Random Forest Regressor is a better model when identifying sleep
+    disorder.
 
     Summing up:
 
