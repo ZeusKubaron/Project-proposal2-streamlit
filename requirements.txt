@@ -2,9 +2,7 @@ streamlit
 pandas
 altair
 plotly
-
 sklearn
-
 sklearn.ensemble
 RandomForestClassifier
 sklearn.tree 
@@ -21,11 +19,7 @@ sklearn.cluster
 KMeans
 matplotlib.pyplot 
 seaborn 
-
 sklearn.preprocessing
 MinMaxScaler
 numpy 
-
 joblib
-You sent
-nc
