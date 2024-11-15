@@ -23,3 +23,5 @@ sklearn.preprocessing
 MinMaxScaler
 numpy 
 joblib
+matplotlib
+
